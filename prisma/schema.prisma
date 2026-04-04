@@ -8,25 +8,50 @@ datasource db {
 }
 
 model Medicamento {
-  id                String   @id @default(cuid())
-  nombre            String
-  principioActivo   String
-  familia           String
-  presentacion      String
-  laboratorio       String
-  precioReferencia  Float?
-  farmacia          String?
-  efectosAdversos   String[]
+  id                 String              @id @default(cuid())
+  nombre             String              @unique
+  principioActivo    String
+  familia            String
+  presentacion       String
+  laboratorio        String
+  precioReferencia   Float?
+  vidaMedia          String?
+  nivelInteracciones String?
+  efectosAdversos    String[]
   contraindicaciones String[]
-  indicaciones      String[]
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  indicaciones       String[]
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  favoritos          Favorito[]
 }
 
 model Usuario {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  isPro     Boolean  @default(false)
+  id        String              @id @default(cuid())
+  email     String              @unique
+  password  String
+  nombre    String?
+  isPro     Boolean             @default(false)
   stripeId  String?
+  createdAt DateTime            @default(now())
+  favoritos          Favorito[]
+  historial          HistorialBusqueda[]
+}
+
+model Favorito {
+  id            String      @id @default(cuid())
+  usuarioId     String
+  medicamentoId String
+  usuario       Usuario     @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  medicamento   Medicamento @relation(fields: [medicamentoId], references: [id], onDelete: Cascade)
+  createdAt     DateTime    @default(now())
+
+  @@unique([usuarioId, medicamentoId])
+}
+
+model HistorialBusqueda {
+  id        String   @id @default(cuid())
+  usuarioId String
+  query     String
+  usuario   Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
 }

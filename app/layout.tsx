@@ -1,21 +1,21 @@
+import type { Metadata } from 'next'
+import type { ReactNode } from 'react'
 import './globals.css'
-import { Inter } from 'next/font/google'
 import Header from './components/Layout/Header'
 import MobileNav from './components/Layout/MobileNav'
 
-const inter = Inter({ subsets: ['latin'] })
+export const metadata: Metadata = {
+  title: 'FINLAY — Fármacos en Chile',
+  description: 'Consulta y compara información clínica de fármacos disponibles en Chile: indicaciones, efectos adversos, contraindicaciones y más.',
+}
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="es">
-      <body className={inter.className}>
-        <div className="min-h-screen bg-gray-50 pb-16 md:pb-0">
+      <body>
+        <div className="min-h-screen pb-16 md:pb-0">
           <Header />
-          <main className="container mx-auto px-4 py-4 max-w-md md:max-w-2xl lg:max-w-4xl">
+          <main className="container mx-auto px-4 py-6 max-w-5xl">
             {children}
           </main>
           <MobileNav />

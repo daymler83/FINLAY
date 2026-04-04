@@ -1,7 +1,6 @@
-import { PrismaClient } from '@prisma/client'
 import { NextRequest, NextResponse } from 'next/server'
-
-const prisma = new PrismaClient()
+import { prisma } from '@/lib/prisma'
+import { resolveClinicalCategory } from '@/lib/clinicalCategory'
 
 export async function GET(
   request: NextRequest,
@@ -22,7 +21,10 @@ export async function GET(
       return NextResponse.json({ error: 'Medicamento no encontrado' }, { status: 404 })
     }
     
-    return NextResponse.json(medicamento)
+    return NextResponse.json({
+      ...medicamento,
+      categoriaClinica: resolveClinicalCategory(medicamento.familia, medicamento.principioActivo),
+    })
   } catch (error) {
     console.error('Error:', error)
     return NextResponse.json({ error: 'Error interno' }, { status: 500 })

@@ -1,5 +1,5 @@
 'use client'
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import useSWR from 'swr'
 import Link from 'next/link'
@@ -52,7 +52,7 @@ export default function Home() {
       ? `/api/medicamentos?categoria=${encodeURIComponent(categoriaActiva)}`
       : '/api/medicamentos'
 
-  const { data, isLoading, error } = useSWR<ApiResponse>(url, fetcher, {
+  const { data, isLoading, error, mutate } = useSWR<ApiResponse>(url, fetcher, {
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
     shouldRetryOnError: false,
@@ -63,6 +63,10 @@ export default function Home() {
   const total = data?.total ?? 0
   const limit = data?.limit ?? 10
   const maxComparar = isPro ? 5 : 2
+
+  useEffect(() => {
+    void mutate()
+  }, [user?.id, mutate])
 
   const handleSearch = useCallback((q: string) => {
     setQuery(q)

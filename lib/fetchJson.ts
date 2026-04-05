@@ -1,7 +1,10 @@
 const DEFAULT_TIMEOUT_MS = 8000
 
 export async function fetchJson<T>(input: RequestInfo | URL, init?: RequestInit): Promise<T> {
-  const response = await fetch(input, init)
+  const response = await fetch(input, {
+    cache: 'no-store',
+    ...init,
+  })
 
   if (!response.ok) {
     throw new Error(`HTTP ${response.status}`)
@@ -21,6 +24,7 @@ export async function fetchJsonWithTimeout<T>(
   try {
     return await fetchJson<T>(input, {
       ...init,
+      cache: 'no-store',
       signal: controller.signal,
     })
   } catch (error) {

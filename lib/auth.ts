@@ -6,6 +6,10 @@ export const COOKIE_NAME = 'farmachile_session'
 const SESSION_MAX_AGE = 60 * 60 * 24 * 30
 
 function getSecret() {
+  if (process.env.NODE_ENV === 'production' && !process.env.JWT_SECRET) {
+    throw new Error('Falta configurar JWT_SECRET en producción')
+  }
+
   return new TextEncoder().encode(
     process.env.JWT_SECRET ?? 'farmachile-dev-secret-cambiar-en-produccion'
   )

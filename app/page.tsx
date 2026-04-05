@@ -8,6 +8,7 @@ import DrugCard from './components/DrugCard'
 import { DrugCardSkeleton } from './components/LoadingSkeleton'
 import { Scale, Zap, Lock } from 'lucide-react'
 import { fetchJsonWithTimeout } from '@/lib/fetchJson'
+import { useAuth } from '@/hooks/useAuth'
 
 const FILTROS = [
   { label: 'Antihipertensivos', categoria: 'antihipertensivo' },
@@ -38,6 +39,7 @@ interface ApiResponse {
 
 export default function Home() {
   const router = useRouter()
+  const { user } = useAuth()
   const [query, setQuery] = useState('')
   const [categoriaActiva, setCategoriaActiva] = useState('')
   const [seleccionados, setSeleccionados] = useState<string[]>([])
@@ -57,7 +59,7 @@ export default function Home() {
     errorRetryCount: 0,
   })
   const medicamentos = data?.medicamentos ?? []
-  const isPro = data?.isPro ?? false
+  const isPro = user?.isPro ?? data?.isPro ?? false
   const total = data?.total ?? 0
   const limit = data?.limit ?? 20
   const maxComparar = isPro ? 5 : 2

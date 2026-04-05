@@ -6,6 +6,7 @@ import { ClinicalCategory, matchesClinicalCategory, resolveClinicalCategory } fr
 
 const FREE_LIMIT = 20
 const PRO_LIMIT  = 500
+export const dynamic = 'force-dynamic'
 
 type MedicamentoBase = {
   id: string
@@ -29,7 +30,14 @@ export async function GET(request: NextRequest) {
   const categoria = searchParams.get('categoria')
 
   const session = await getSession()
-  const isPro = session?.isPro ?? false
+  const usuario = session
+    ? await prisma.usuario.findUnique({
+        where: { id: session.userId },
+        select: { isPro: true },
+      })
+    : null
+
+  const isPro = usuario?.isPro ?? false
   const limit  = isPro ? PRO_LIMIT : FREE_LIMIT
 
   const where: Prisma.MedicamentoWhereInput = {}

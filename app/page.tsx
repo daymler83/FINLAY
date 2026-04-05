@@ -101,7 +101,7 @@ export default function Home() {
       {/* Hero */}
       <div className="text-center pt-4 pb-2">
         <h1 className="text-2xl font-bold text-gray-900 mb-2 sm:text-3xl">
-          Explorador de medicamentos
+          Busca y compara fármacos
         </h1>
         <p className="text-gray-500 text-base">
           Compara principios activos, presentaciones y más información clínica

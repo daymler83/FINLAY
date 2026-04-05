@@ -1,7 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Cross, LogOut, Zap, Star, MessageSquareText, BookOpenText } from 'lucide-react'
+import { Cross, LogOut, LogIn, UserPlus, Zap, Star, MessageSquareText, BookOpenText } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 
 export default function Header() {
@@ -16,13 +16,13 @@ export default function Header() {
 
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
-      <div className="container mx-auto px-4 max-w-5xl h-14 flex items-center justify-between">
+      <div className="container mx-auto px-4 max-w-5xl h-12 sm:h-14 flex items-center justify-between gap-2">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 shrink-0">
-          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+          <div className="w-7 h-7 sm:w-8 sm:h-8 bg-blue-600 rounded-lg flex items-center justify-center">
             <Cross size={16} className="text-white" fill="white" />
           </div>
-          <span className="font-bold text-lg tracking-tight text-gray-900">FINLAY</span>
+          <span className="font-bold text-base sm:text-lg tracking-tight text-gray-900">FINLAY</span>
         </Link>
 
         {/* Auth */}
@@ -77,14 +77,17 @@ export default function Header() {
             <>
               <Link
                 href="/login"
-                className="text-sm font-medium text-gray-700 px-4 py-2 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+                className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-gray-700 px-3 sm:px-4 py-2 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors whitespace-nowrap"
               >
-                Iniciar sesión
+                <LogIn size={14} />
+                <span className="hidden sm:inline">Iniciar sesión</span>
+                <span className="sm:hidden">Entrar</span>
               </Link>
               <Link
                 href="/register"
-                className="text-sm font-medium text-gray-700 px-4 py-2 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+                className="hidden sm:inline-flex items-center gap-1.5 text-sm font-medium text-gray-700 px-4 py-2 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors whitespace-nowrap"
               >
+                <UserPlus size={14} />
                 Registrarse
               </Link>
             </>

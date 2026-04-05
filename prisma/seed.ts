@@ -13,7 +13,8 @@ async function main() {
       presentacion: "Comprimido 20mg",
       laboratorio: "Varios (genérico)",
       precioReferencia: 4500,
-      farmacia: "Salcobrand",
+      vidaMedia: "11 h",
+      nivelInteracciones: "Bajo",
       efectosAdversos: ["Tos seca", "Mareos", "Hipotensión"],
       contraindicaciones: ["Embarazo", "Estenosis renal bilateral"],
       indicaciones: ["Hipertensión arterial", "Insuficiencia cardíaca"]
@@ -25,7 +26,8 @@ async function main() {
       presentacion: "Comprimido 50mg",
       laboratorio: "Merck",
       precioReferencia: 8900,
-      farmacia: "Cruz Verde",
+      vidaMedia: "2 h",
+      nivelInteracciones: "Bajo",
       efectosAdversos: ["Mareos", "Fatiga", "Hiperkalemia"],
       contraindicaciones: ["Embarazo", "Insuficiencia hepática severa"],
       indicaciones: ["Hipertensión arterial", "Nefropatía diabética"]
@@ -37,7 +39,8 @@ async function main() {
       presentacion: "Comprimido 5mg",
       laboratorio: "Pfizer",
       precioReferencia: 7200,
-      farmacia: "Ahumada",
+      vidaMedia: "30-50 h",
+      nivelInteracciones: "Moderado",
       efectosAdversos: ["Edema de tobillos", "Rubor facial", "Palpitaciones"],
       contraindicaciones: ["Hipotensión severa", "Shock cardiogénico"],
       indicaciones: ["Hipertensión arterial", "Angina de pecho"]
@@ -45,8 +48,10 @@ async function main() {
   ]
 
   for (const med of medicamentos) {
-    await prisma.medicamento.create({
-      data: med
+    await prisma.medicamento.upsert({
+      where: { nombre: med.nombre },
+      update: med,
+      create: med
     })
     console.log(`✅ Agregado: ${med.nombre}`)
   }

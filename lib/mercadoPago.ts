@@ -92,7 +92,13 @@ export function validateMercadoPagoWebhookSignature(params: {
   dataId: string | number
 }) {
   const secret = process.env.MERCADOPAGO_WEBHOOK_SECRET
-  if (!secret) return true
+  if (!secret) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('Falta configurar MERCADOPAGO_WEBHOOK_SECRET en producción')
+    }
+
+    return true
+  }
 
   const signatureHeader = params.request.headers.get('x-signature')
   const requestId = params.request.headers.get('x-request-id')
@@ -112,4 +118,12 @@ export function validateMercadoPagoWebhookSignature(params: {
 export async function fetchMercadoPagoPayment(paymentId: string | number) {
   const { payment } = createMercadoPagoClients()
   return payment.get({ id: paymentId })
+}
+
+export function shouldEnforceMercadoPagoWebhookSignature() {
+  if (process.env.MERCADOPAGO_WEBHOOK_STRICT_SIGNATURE === 'false') {
+    return false
+  }
+
+  return process.env.NODE_ENV === 'production'
 }

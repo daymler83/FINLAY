@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { activateProUser } from '@/lib/payments'
 import {
   fetchMercadoPagoPayment,
+  shouldEnforceMercadoPagoWebhookSignature,
   validateMercadoPagoWebhookSignature,
 } from '@/lib/mercadoPago'
 
@@ -51,8 +52,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'paymentId no recibido' }, { status: 400 })
   }
 
-  if (!validateMercadoPagoWebhookSignature({ request, dataId: paymentId })) {
+  const signatureValid = validateMercadoPagoWebhookSignature({ request, dataId: paymentId })
+  if (!signatureValid && shouldEnforceMercadoPagoWebhookSignature()) {
     return NextResponse.json({ error: 'Firma inválida' }, { status: 401 })
+  }
+
+  if (!signatureValid) {
+    console.warn('Mercado Pago webhook signature skipped for test mode')
   }
 
   try {

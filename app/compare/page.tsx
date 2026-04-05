@@ -5,8 +5,7 @@ import useSWR from 'swr'
 import Link from 'next/link'
 import { X, Scale, Search, Lock, Zap } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
-
-const fetcher = (url: string) => fetch(url).then(r => r.json())
+import { fetchJsonWithTimeout } from '@/lib/fetchJson'
 
 interface Medicamento {
   id: string
@@ -44,7 +43,13 @@ function AutocompleteSearch({ onAdd, disabledIds }: { onAdd: (med: Medicamento) 
 
   const { data } = useSWR<{ medicamentos: Medicamento[] }>(
     term.length >= 2 ? `/api/medicamentos?q=${encodeURIComponent(term)}` : null,
-    fetcher
+    fetcher,
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      shouldRetryOnError: false,
+      errorRetryCount: 0,
+    }
   )
   const results = data?.medicamentos ?? []
   const available = results.filter(m => !disabledIds.includes(m.id))
@@ -102,14 +107,21 @@ function CompareContent() {
 
   const [selectedIds, setSelectedIds] = useState<string[]>(initialIds)
   const [addedCache, setAddedCache] = useState<Record<string, Medicamento>>({})
+  const initialKey = initialIds.length > 0 ? `compare:${initialIds.join(',')}` : null
 
   const { data: initialData } = useSWR<Medicamento[]>(
-    initialIds.length > 0
-      ? initialIds.map(id => `/api/medicamentos/${id}`)
-      : null,
-    async (urls: string[]) => {
-      const results = await Promise.all(urls.map(u => fetch(u).then(r => r.json())))
-      return results.filter(r => !r.error)
+    initialKey,
+    async () => {
+      const results = await Promise.all(
+        initialIds.map(id => fetchJsonWithTimeout<Medicamento>(`/api/medicamentos/${id}`))
+      )
+      return results.filter((r): r is Medicamento => !('error' in r))
+    },
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      shouldRetryOnError: false,
+      errorRetryCount: 0,
     }
   )
 
@@ -301,6 +313,10 @@ function CompareContent() {
       )}
     </div>
   )
+}
+
+async function fetcher(url: string): Promise<{ medicamentos: Medicamento[] }> {
+  return fetchJsonWithTimeout<{ medicamentos: Medicamento[] }>(url)
 }
 
 export default function ComparePage() {

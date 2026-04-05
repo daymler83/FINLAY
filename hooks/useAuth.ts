@@ -2,8 +2,7 @@
 import { useEffect } from 'react'
 import useSWR from 'swr'
 import { useRouter } from 'next/navigation'
-
-const fetcher = (url: string) => fetch(url).then(res => res.json())
+import { fetchJsonWithTimeout } from '@/lib/fetchJson'
 
 interface User {
   id: string
@@ -15,6 +14,9 @@ interface User {
 export function useAuth() {
   const { data, isLoading, mutate } = useSWR<{ user: User | null }>('/api/auth/me', fetcher, {
     revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+    shouldRetryOnError: false,
+    errorRetryCount: 0,
   })
 
   return {
@@ -35,4 +37,8 @@ export function useRequireAuth() {
   }, [isLoading, user, router])
 
   return { user, isLoading }
+}
+
+async function fetcher(url: string): Promise<{ user: User | null }> {
+  return fetchJsonWithTimeout<{ user: User | null }>(url)
 }

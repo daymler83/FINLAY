@@ -7,8 +7,7 @@ import SearchBar from './components/SearchBar'
 import DrugCard from './components/DrugCard'
 import { DrugCardSkeleton } from './components/LoadingSkeleton'
 import { Scale, Zap, Lock } from 'lucide-react'
-
-const fetcher = (url: string) => fetch(url).then(r => r.json())
+import { fetchJsonWithTimeout } from '@/lib/fetchJson'
 
 const FILTROS = [
   { label: 'Antihipertensivos', categoria: 'antihipertensivo' },
@@ -51,7 +50,12 @@ export default function Home() {
       ? `/api/medicamentos?categoria=${encodeURIComponent(categoriaActiva)}`
       : '/api/medicamentos'
 
-  const { data, isLoading, error } = useSWR<ApiResponse>(url, fetcher)
+  const { data, isLoading, error } = useSWR<ApiResponse>(url, fetcher, {
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+    shouldRetryOnError: false,
+    errorRetryCount: 0,
+  })
   const medicamentos = data?.medicamentos ?? []
   const isPro = data?.isPro ?? false
   const total = data?.total ?? 0
@@ -229,4 +233,8 @@ export default function Home() {
       )}
     </div>
   )
+}
+
+async function fetcher(url: string): Promise<ApiResponse> {
+  return fetchJsonWithTimeout<ApiResponse>(url)
 }

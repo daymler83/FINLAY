@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { prisma } from '@/lib/prisma'
-import { createToken, COOKIE_NAME } from '@/lib/auth'
+import { createToken, setSessionCookie } from '@/lib/auth'
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, password } = await request.json()
+    const { email, password, rememberMe = true } = await request.json()
 
     if (!email || !password) {
       return NextResponse.json({ error: 'Email y contraseña son requeridos' }, { status: 400 })
@@ -14,6 +14,13 @@ export async function POST(request: NextRequest) {
     const usuario = await prisma.usuario.findUnique({ where: { email } })
     if (!usuario) {
       return NextResponse.json({ error: 'Credenciales incorrectas' }, { status: 401 })
+    }
+
+    if (!usuario.password) {
+      return NextResponse.json(
+        { error: 'Esta cuenta usa acceso con Google o Microsoft' },
+        { status: 401 }
+      )
     }
 
     const valid = await bcrypt.compare(password, usuario.password)
@@ -26,14 +33,7 @@ export async function POST(request: NextRequest) {
     const response = NextResponse.json({
       user: { id: usuario.id, email: usuario.email, nombre: usuario.nombre, isPro: usuario.isPro },
     })
-
-    response.cookies.set(COOKIE_NAME, token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 30,
-      path: '/',
-    })
+    setSessionCookie(response, token, Boolean(rememberMe))
 
     return response
   } catch (error) {

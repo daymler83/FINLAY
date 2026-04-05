@@ -34,3 +34,18 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Login Social
+
+Para habilitar acceso con Google y Microsoft, agrega estas variables de entorno:
+
+- `APP_URL`
+- `GOOGLE_CLIENT_ID`
+- `GOOGLE_CLIENT_SECRET`
+- `MICROSOFT_CLIENT_ID`
+- `MICROSOFT_CLIENT_SECRET`
+
+Callbacks a registrar en cada proveedor:
+
+- `https://tu-dominio.com/api/auth/oauth/google/callback`
+- `https://tu-dominio.com/api/auth/oauth/microsoft/callback`

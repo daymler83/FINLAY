@@ -26,15 +26,19 @@ model Medicamento {
 }
 
 model Usuario {
-  id        String              @id @default(cuid())
-  email     String              @unique
-  password  String
-  nombre    String?
-  isPro     Boolean             @default(false)
-  stripeId  String?
-  createdAt DateTime            @default(now())
-  favoritos          Favorito[]
-  historial          HistorialBusqueda[]
+  id                       String              @id @default(cuid())
+  email                    String              @unique
+  password                 String?
+  nombre                   String?
+  isPro                    Boolean             @default(false)
+  stripeId                 String?
+  passwordResetTokenHash   String?
+  passwordResetExpiresAt   DateTime?
+  createdAt                DateTime            @default(now())
+  favoritos                Favorito[]
+  historial                HistorialBusqueda[]
+
+  @@index([passwordResetTokenHash])
 }
 
 model Favorito {

@@ -5,8 +5,7 @@ import { Star, Lock } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import DrugCard from '@/app/components/DrugCard'
 import { DrugCardSkeleton } from '@/app/components/LoadingSkeleton'
-
-const fetcher = (url: string) => fetch(url).then(r => r.json())
+import { fetchJsonWithTimeout } from '@/lib/fetchJson'
 
 interface Medicamento {
   id: string
@@ -25,7 +24,13 @@ export default function FavoritosPage() {
 
   const { data: favoritos, isLoading } = useSWR<Medicamento[]>(
     user ? '/api/favoritos' : null,
-    fetcher
+    fetcher,
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      shouldRetryOnError: false,
+      errorRetryCount: 0,
+    }
   )
 
   if (authLoading) return null
@@ -96,4 +101,8 @@ export default function FavoritosPage() {
       )}
     </div>
   )
+}
+
+async function fetcher(url: string): Promise<Medicamento[]> {
+  return fetchJsonWithTimeout<Medicamento[]>(url)
 }

@@ -1,7 +1,9 @@
 import { SignJWT, jwtVerify } from 'jose'
+import type { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 
 export const COOKIE_NAME = 'farmachile_session'
+const SESSION_MAX_AGE = 60 * 60 * 24 * 30
 
 function getSecret() {
   return new TextEncoder().encode(
@@ -21,6 +23,24 @@ export async function createToken(payload: SessionPayload): Promise<string> {
     .setIssuedAt()
     .setExpirationTime('30d')
     .sign(getSecret())
+}
+
+export function setSessionCookie(
+  response: NextResponse,
+  token: string,
+  rememberMe = true,
+) {
+  response.cookies.set(COOKIE_NAME, token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: rememberMe ? SESSION_MAX_AGE : undefined,
+    path: '/',
+  })
+}
+
+export function clearSessionCookie(response: NextResponse) {
+  response.cookies.set(COOKIE_NAME, '', { maxAge: 0, path: '/' })
 }
 
 export async function verifyToken(token: string): Promise<SessionPayload | null> {

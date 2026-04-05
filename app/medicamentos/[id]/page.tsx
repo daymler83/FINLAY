@@ -10,9 +10,25 @@ import {
 import { useAuth } from '@/hooks/useAuth'
 import Badge from '@/app/components/Badge'
 import { DetailSkeleton } from '@/app/components/LoadingSkeleton'
-import { getClinicalCategoryLabel } from '@/lib/clinicalCategory'
+import { getClinicalCategoryLabel, type ClinicalCategory } from '@/lib/clinicalCategory'
+import { fetchJsonWithTimeout } from '@/lib/fetchJson'
 
-const fetcher = (url: string) => fetch(url).then(r => r.json())
+interface MedicamentoDetalleResponse {
+  id: string
+  nombre: string
+  principioActivo: string
+  presentacion: string
+  familia: string
+  laboratorio: string
+  precioReferencia: number | null
+  vidaMedia: string | null
+  nivelInteracciones: string | null
+  efectosAdversos: string[]
+  contraindicaciones: string[]
+  indicaciones: string[]
+  categoriaClinica?: ClinicalCategory
+  error?: string
+}
 
 function detectGenerico(nombre: string, principioActivo: string): boolean {
   return nombre.toLowerCase().startsWith(principioActivo.toLowerCase().split(' ')[0])
@@ -25,15 +41,27 @@ export default function MedicamentoDetalle() {
   const [favorito, setFavorito] = useState(false)
   const [favLoading, setFavLoading] = useState(false)
 
-  const { data: med, isLoading, error } = useSWR(
+  const { data: med, isLoading, error } = useSWR<MedicamentoDetalleResponse>(
     id ? `/api/medicamentos/${id}` : null,
-    fetcher
+    fetcher,
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      shouldRetryOnError: false,
+      errorRetryCount: 0,
+    }
   )
 
   // Check if already favorito
   const { data: favs } = useSWR(
     user ? '/api/favoritos' : null,
-    fetcher
+    fetcher,
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      shouldRetryOnError: false,
+      errorRetryCount: 0,
+    }
   )
   useEffect(() => {
     if (favs && Array.isArray(favs)) {
@@ -299,4 +327,8 @@ export default function MedicamentoDetalle() {
       </Link>
     </div>
   )
+}
+
+async function fetcher(url: string): Promise<MedicamentoDetalleResponse> {
+  return fetchJsonWithTimeout<MedicamentoDetalleResponse>(url)
 }

@@ -64,6 +64,11 @@ export default function Home() {
   const limit = data?.limit ?? 10
   const maxComparar = isPro ? 5 : 2
 
+  const scrollToSection = (id: string) => {
+    const element = document.getElementById(id)
+    element?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
   useEffect(() => {
     void mutate()
   }, [user?.id, mutate])
@@ -116,8 +121,41 @@ export default function Home() {
         </div>
       </div>
 
+      {isPro && (
+        <div className="rounded-2xl border border-blue-100 bg-blue-50/70 p-4 shadow-sm">
+          <div className="flex items-center justify-between gap-3 mb-3">
+            <div>
+              <p className="text-sm font-semibold text-blue-900">Atajos Pro</p>
+              <p className="text-xs text-blue-600">Ve directo a lo más útil sin recorrer toda la lista.</p>
+            </div>
+            <button
+              onClick={() => scrollToSection('resultados')}
+              className="text-xs font-semibold text-blue-700 hover:underline"
+            >
+              Ir a resultados
+            </button>
+          </div>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+            {[
+              { label: 'Buscar', id: 'buscar' },
+              { label: 'Categorías', id: 'categorias' },
+              { label: 'Comparar', id: 'comparar' },
+              { label: 'Favoritos', href: '/favoritos' },
+            ].map(item => (
+              <button
+                key={item.label}
+                onClick={() => item.href ? router.push(item.href) : scrollToSection(item.id as string)}
+                className="rounded-xl border border-blue-100 bg-white px-3 py-2 text-xs font-semibold text-blue-700 hover:bg-blue-100 transition-colors"
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Buscador + Comparar */}
-      <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
+      <div id="buscar" className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
         <div className="flex-1 min-w-0">
           <SearchBar onSearch={handleSearch} />
         </div>
@@ -141,7 +179,7 @@ export default function Home() {
       </div>
 
       {/* Filtros rápidos */}
-      <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+      <div id="categorias" className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
         {FILTROS.map(({ label, categoria }) => (
           <button
             key={categoria}
@@ -197,6 +235,7 @@ export default function Home() {
 
       {/* Grid */}
       {!isLoading && !error && medicamentos.length > 0 && (
+        <div id="resultados" className="scroll-mt-24">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {medicamentos.map(med => (
             <DrugCard
@@ -206,6 +245,7 @@ export default function Home() {
               onToggle={handleToggle}
             />
           ))}
+        </div>
         </div>
       )}
 
@@ -232,7 +272,7 @@ export default function Home() {
 
       {/* Barra flotante de comparación */}
       {seleccionados.length >= 2 && (
-        <div className="fixed bottom-20 left-0 right-0 flex justify-center z-30 px-4 md:bottom-6">
+        <div id="comparar" className="fixed bottom-20 left-0 right-0 flex justify-center z-30 px-4 md:bottom-6">
           <button
             onClick={handleComparar}
             className="flex items-center gap-3 bg-gray-900 text-white font-semibold px-6 py-3.5 rounded-2xl shadow-xl hover:bg-gray-800 transition-all"

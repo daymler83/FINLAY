@@ -117,14 +117,14 @@ export default function Home() {
       </div>
 
       {/* Buscador + Comparar */}
-      <div className="flex gap-3 items-center">
-        <div className="flex-1">
+      <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
+        <div className="flex-1 min-w-0">
           <SearchBar onSearch={handleSearch} />
         </div>
         <button
           onClick={handleComparar}
           disabled={seleccionados.length < 2}
-          className={`shrink-0 flex items-center gap-2 font-semibold px-5 py-3.5 rounded-2xl border transition-all whitespace-nowrap ${
+          className={`shrink-0 flex items-center justify-center gap-2 font-semibold px-5 py-3.5 rounded-2xl border transition-all whitespace-nowrap w-full sm:w-auto ${
             seleccionados.length >= 2
               ? 'bg-gray-900 text-white border-gray-900 hover:bg-gray-800 shadow-sm'
               : 'bg-white text-gray-400 border-gray-200 cursor-not-allowed'

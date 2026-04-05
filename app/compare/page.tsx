@@ -145,10 +145,10 @@ function CompareContent() {
   return (
     <div className="space-y-6 pb-28">
       {/* Header */}
-      <div className="flex items-center gap-2 pt-2">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-2 pt-2">
         <Scale size={20} className="text-blue-600" />
         <h1 className="text-xl font-bold text-gray-900">Comparar fármacos</h1>
-        <Link href="/" className="ml-auto text-sm text-blue-600 hover:underline">← Volver al listado</Link>
+        <Link href="/" className="sm:ml-auto text-sm text-blue-600 hover:underline">← Volver al listado</Link>
       </div>
 
       {/* Selector */}

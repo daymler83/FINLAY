@@ -88,7 +88,7 @@ export default function DrugCard({
         )}
 
         {/* Info grid */}
-        <div className="grid grid-cols-2 gap-x-4 gap-y-2 mt-3 pt-3 border-t border-gray-100">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 mt-3 pt-3 border-t border-gray-100">
           <div>
             <p className="text-[10px] text-gray-400 uppercase font-medium tracking-wide">Presentación</p>
             <p className="text-sm font-semibold text-gray-800 mt-0.5">{presentacion}</p>

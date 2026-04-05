@@ -37,6 +37,7 @@ model Usuario {
   createdAt                DateTime            @default(now())
   favoritos                Favorito[]
   historial                HistorialBusqueda[]
+  feedbacks                Feedback[]
 
   @@index([passwordResetTokenHash])
 }
@@ -58,4 +59,19 @@ model HistorialBusqueda {
   query     String
   usuario   Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
+}
+
+model Feedback {
+  id        String   @id @default(cuid())
+  userId    String?
+  email     String?
+  type      String
+  rating    Int
+  title     String?
+  message   String
+  source    String   @default("web")
+  createdAt DateTime @default(now())
+  usuario   Usuario? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt])
 }

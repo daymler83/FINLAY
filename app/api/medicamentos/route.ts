@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { getSession } from '@/lib/auth'
 import { ClinicalCategory, matchesClinicalCategory, resolveClinicalCategory } from '@/lib/clinicalCategory'
 
-const FREE_LIMIT = 20
+const FREE_LIMIT = 10
 const PRO_LIMIT  = 500
 export const dynamic = 'force-dynamic'
 

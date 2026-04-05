@@ -1,7 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Cross, LogOut, Zap, Star } from 'lucide-react'
+import { Cross, LogOut, Zap, Star, MessageSquareText, BookOpenText } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 
 export default function Header() {
@@ -27,6 +27,20 @@ export default function Header() {
 
         {/* Auth */}
         <div className="flex items-center gap-2">
+          <Link
+            href="/feedback"
+            className="hidden lg:inline-flex items-center gap-1.5 text-xs font-semibold text-gray-600 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
+          >
+            <MessageSquareText size={14} />
+            Feedback
+          </Link>
+          <Link
+            href="/acerca-de"
+            className="hidden lg:inline-flex items-center gap-1.5 text-xs font-semibold text-gray-600 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
+          >
+            <BookOpenText size={14} />
+            Qué es FINLAY
+          </Link>
           {user ? (
             <>
               {user.isPro ? (

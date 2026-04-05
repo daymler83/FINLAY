@@ -61,7 +61,7 @@ export default function Home() {
   const medicamentos = data?.medicamentos ?? []
   const isPro = user?.isPro ?? data?.isPro ?? false
   const total = data?.total ?? 0
-  const limit = data?.limit ?? 20
+  const limit = data?.limit ?? 10
   const maxComparar = isPro ? 5 : 2
 
   const handleSearch = useCallback((q: string) => {
@@ -102,6 +102,14 @@ export default function Home() {
         <p className="text-gray-500 text-base">
           Compara principios activos, presentaciones y más información clínica
         </p>
+        <div className="mt-4 flex flex-wrap justify-center gap-2">
+          <Link href="/feedback" className="inline-flex items-center rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 hover:bg-blue-100 transition-colors">
+            Dejar feedback
+          </Link>
+          <Link href="/acerca-de" className="inline-flex items-center rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 transition-colors">
+            Qué es FINLAY
+          </Link>
+        </div>
       </div>
 
       {/* Buscador + Comparar */}
@@ -147,8 +155,8 @@ export default function Home() {
 
       {/* Conteo */}
       {!isLoading && !error && data && (
-        <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest">
-          Mostrando {medicamentos.length} de {total} · Selecciona hasta {maxComparar}
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest">
+          Mostrando {medicamentos.length} medicamentos · Selecciona hasta {maxComparar}
           {seleccionados.length > 0 && (
             <span className="ml-3 text-blue-600 normal-case tracking-normal font-medium">
               {seleccionados.length} seleccionado{seleccionados.length > 1 ? 's' : ''}
@@ -205,9 +213,7 @@ export default function Home() {
               <Lock size={16} className="text-blue-600" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-blue-900">
-                {total - limit} fármacos más disponibles con Pro
-              </p>
+              <p className="text-sm font-semibold text-blue-900">Más fármacos disponibles con Pro</p>
               <p className="text-xs text-blue-500">Accede a toda la base de datos</p>
             </div>
           </div>

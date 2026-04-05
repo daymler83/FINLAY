@@ -1,15 +1,39 @@
 'use client'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { CheckCircle, Zap } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 
 export default function ProSuccessPage() {
-  const { mutate } = useAuth()
+  const { user, mutate } = useAuth()
+  const [verifying, setVerifying] = useState(true)
 
   useEffect(() => {
-    // Revalidar sesión para reflejar isPro = true
-    mutate()
+    let alive = true
+    let attempts = 0
+    const maxAttempts = 10
+
+    const poll = async () => {
+      while (alive && attempts < maxAttempts) {
+        attempts += 1
+        const result = await mutate()
+        if (result?.user?.isPro) {
+          if (!alive) return
+          setVerifying(false)
+          return
+        }
+
+        await new Promise(resolve => setTimeout(resolve, 1500))
+      }
+
+      if (alive) setVerifying(false)
+    }
+
+    void poll()
+
+    return () => {
+      alive = false
+    }
   }, [mutate])
 
   return (
@@ -20,11 +44,17 @@ export default function ProSuccessPage() {
 
       <div>
         <div className="inline-flex items-center gap-1 bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm font-medium mb-3">
-          <Zap size={14} /> FarmaChile Pro activado
+          <Zap size={14} /> {user?.isPro ? 'FarmaChile Pro activado' : 'Verificando activación...'}
         </div>
-        <h1 className="text-2xl font-bold text-gray-900">¡Pago exitoso!</h1>
+        <h1 className="text-2xl font-bold text-gray-900">
+          {user?.isPro ? '¡Pago exitoso!' : 'Procesando tu activación'}
+        </h1>
         <p className="text-gray-500 mt-2 max-w-xs mx-auto">
-          Tu cuenta Pro ha sido activada. Ya tienes acceso completo a efectos adversos y contraindicaciones.
+          {verifying
+            ? 'Estamos confirmando el pago con Mercado Pago. Esto puede tardar unos segundos.'
+            : user?.isPro
+            ? 'Tu cuenta Pro ha sido activada. Ya tienes acceso completo a efectos adversos y contraindicaciones.'
+            : 'Todavía no pudimos confirmar tu cuenta Pro. Espera un momento y vuelve a intentar.'}
         </p>
       </div>
 
@@ -32,7 +62,7 @@ export default function ProSuccessPage() {
         href="/"
         className="inline-block bg-blue-600 text-white font-medium px-8 py-3 rounded-xl hover:bg-blue-700 transition-colors"
       >
-        Empezar a usar FarmaChile Pro
+        {user?.isPro ? 'Empezar a usar FarmaChile Pro' : 'Volver al inicio'}
       </Link>
     </div>
   )

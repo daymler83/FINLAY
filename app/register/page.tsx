@@ -42,8 +42,8 @@ export default function RegisterPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-2">
-            <Pill size={28} className="text-blue-600" />
-            <span className="text-2xl font-bold text-gray-800">Farma<span className="text-blue-600">Chile</span></span>
+            <Pill size={24} className="text-blue-600 sm:size-28" />
+            <span className="whitespace-nowrap text-xl font-bold text-gray-800 sm:text-2xl">Farma<span className="text-blue-600">Chile</span></span>
           </div>
           <p className="text-gray-500 text-sm">Crea tu cuenta con correo y contraseña</p>
         </div>

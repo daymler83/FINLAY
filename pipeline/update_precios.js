@@ -379,11 +379,26 @@ async function getPrecioMasBarato(browser, medicamento) {
   return resultados.reduce((min, current) => (current.precio < min.precio ? current : min))
 }
 
-async function run() {
-  const args = process.argv.slice(2)
-  const nombreFiltro = args.find((_, i) => args[i - 1] === '--nombre')
+function parseArgs(argv) {
+  const args = argv.slice(2)
+  const nombreIndex = args.findIndex((arg, index) => arg === '--nombre' && index < args.length - 1)
+  const nombre = nombreIndex >= 0 ? args[nombreIndex + 1] : null
+  const soloSinPrecio = args.includes('--solo-sin-precio')
 
-  const where = nombreFiltro ? { nombre: { contains: nombreFiltro, mode: 'insensitive' } } : {}
+  return { nombre, soloSinPrecio }
+}
+
+async function run() {
+  const { nombre, soloSinPrecio } = parseArgs(process.argv)
+
+  const where = {}
+  if (nombre) {
+    where.nombre = { contains: nombre, mode: 'insensitive' }
+  }
+  if (soloSinPrecio) {
+    where.precioReferencia = null
+  }
+
   const medicamentos = await prisma.medicamento.findMany({
     where,
     select: {
@@ -395,7 +410,12 @@ async function run() {
     orderBy: { nombre: 'asc' },
   })
 
-  console.log(`🔍 Actualizando precios para ${medicamentos.length} medicamento(s)...\n`)
+  const scopeLabel = [
+    soloSinPrecio ? 'sin precio' : null,
+    nombre ? `nombre contiene "${nombre}"` : null,
+  ].filter(Boolean).join(' y ') || 'todos'
+
+  console.log(`🔍 Actualizando precios para ${medicamentos.length} medicamento(s) (${scopeLabel})...\n`)
 
   const browser = await puppeteer.launch({
     headless: true,

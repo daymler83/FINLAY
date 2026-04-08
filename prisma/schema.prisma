@@ -75,3 +75,17 @@ model Feedback {
 
   @@index([createdAt])
 }
+
+model ComparisonInsightCache {
+  id              String   @id @default(cuid())
+  requestHash     String   @unique
+  medicationIds   Json
+  patientProfile  Json
+  response        Json
+  sourceModel     String
+  createdByUserId String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([createdAt])
+}

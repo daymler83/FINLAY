@@ -3,7 +3,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import {
   CheckCircle, Lock, Zap, AlertTriangle, Ban,
-  Star, Scale, Clock, Activity, FileText
+  Star, Scale, Clock, Activity, FileText, Brain
 } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 
@@ -41,6 +41,7 @@ export default function ProPage() {
     { icon: Clock,         color: 'text-purple-500',  label: 'Historial de búsquedas' },
     { icon: FileText,      color: 'text-green-500',   label: 'Exportar nota clínica' },
     { icon: Activity,      color: 'text-teal-500',    label: 'Nivel de interacciones' },
+    { icon: Brain,         color: 'text-indigo-500',  label: 'Análisis clínico con IA' },
   ]
 
   if (isLoading) return null
@@ -109,6 +110,7 @@ export default function ProPage() {
           ['Favoritos', '—', '✓'],
           ['Historial', '—', '✓'],
           ['Nota clínica', '—', '✓'],
+          ['Análisis clínico con IA', '—', '✓'],
         ].map(([label, free, pro]) => (
           <div key={label} className="grid grid-cols-3 border-b border-gray-100 last:border-0">
             <div className="p-3 text-xs text-gray-600">{label}</div>

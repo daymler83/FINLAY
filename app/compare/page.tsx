@@ -3,7 +3,7 @@ import { useState, useMemo, useEffect, useRef, useCallback, Suspense } from 'rea
 import { useSearchParams } from 'next/navigation'
 import useSWR from 'swr'
 import Link from 'next/link'
-import { X, Scale, Search, Lock, Zap, Brain, Download, Save, UserRound } from 'lucide-react'
+import { X, Scale, Search, Lock, Zap, Brain, Download, Save, UserRound, FlaskConical } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { fetchJsonWithTimeout } from '@/lib/fetchJson'
 import { buildSimplePdfBytes } from '@/lib/simplePdf'
@@ -411,20 +411,22 @@ function CompareContent() {
   return (
     <div className="space-y-6 pb-28">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center gap-2 pt-2">
-        <Scale size={20} className="text-blue-600" />
-        <h1 className="text-xl font-bold text-gray-900">Comparar fármacos</h1>
-        <Link href="/" className="sm:ml-auto text-sm text-blue-600 hover:underline">← Volver al listado</Link>
+      <div className="flex items-center gap-3 pt-2">
+        <div className="w-9 h-9 bg-slate-100 rounded-xl flex items-center justify-center shrink-0">
+          <Scale size={17} className="text-slate-600" />
+        </div>
+        <h1 className="text-xl font-bold text-slate-900 tracking-tight">Comparar fármacos</h1>
+        <Link href="/" className="ml-auto text-sm text-blue-600 hover:underline font-medium">← Volver</Link>
       </div>
 
       {/* Selector */}
-      <div className="bg-white rounded-2xl p-4 border border-gray-200 shadow-sm space-y-3">
+      <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-3">
         <div className="flex items-center justify-between">
-          <p className="text-sm text-gray-600 font-medium">
+          <p className="text-sm text-slate-700 font-medium">
             Selecciona hasta {maxComparar} fármacos
-            {!isPro && <span className="ml-1.5 text-xs text-blue-500">(Pro: hasta 5)</span>}
+            {!isPro && <span className="ml-1.5 text-xs text-blue-500 font-normal">(Pro: hasta 5)</span>}
           </p>
-          <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${cols >= maxComparar ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-500'}`}>
+          <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${cols >= maxComparar ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-500'}`}>
             {cols}/{maxComparar}
           </span>
         </div>
@@ -432,9 +434,9 @@ function CompareContent() {
         {seleccionados.length > 0 && (
           <div className="flex flex-wrap gap-2">
             {seleccionados.map(med => (
-              <span key={med.id} className="flex items-center gap-1.5 bg-blue-50 text-blue-700 text-xs font-medium px-3 py-1.5 rounded-full border border-blue-100">
+              <span key={med.id} className="flex items-center gap-1.5 bg-slate-100 text-slate-700 text-xs font-medium px-3 py-1.5 rounded-full border border-slate-200">
                 {med.nombre}
-                <button onClick={() => handleRemove(med.id)} aria-label="Quitar">
+                <button onClick={() => handleRemove(med.id)} aria-label="Quitar" className="text-slate-400 hover:text-slate-600">
                   <X size={11} />
                 </button>
               </span>
@@ -448,12 +450,12 @@ function CompareContent() {
 
         {/* Upsell si es free y llegó al límite */}
         {!isPro && cols >= 2 && (
-          <div className="flex items-center justify-between bg-blue-50 rounded-xl px-3 py-2">
+          <div className="flex items-center justify-between bg-slate-50 border border-slate-100 rounded-xl px-3 py-2">
             <div className="flex items-center gap-2">
-              <Lock size={13} className="text-blue-500" />
-              <p className="text-xs text-blue-600">Pro permite comparar hasta 5 fármacos</p>
+              <Lock size={13} className="text-slate-400" />
+              <p className="text-xs text-slate-600">Pro permite comparar hasta 5 fármacos</p>
             </div>
-            <Link href="/pro" className="text-xs font-semibold text-blue-600 flex items-center gap-1 hover:underline">
+            <Link href="/pro" className="text-xs font-bold text-blue-600 flex items-center gap-1 hover:underline">
               <Zap size={11} /> Pro
             </Link>
           </div>
@@ -462,53 +464,53 @@ function CompareContent() {
 
       {/* Mensaje menos de 2 */}
       {cols < 2 && (
-        <div className="text-center py-14 text-gray-400">
-          <Scale size={32} className="mx-auto mb-3 opacity-30" />
-          <p className="font-medium">
+        <div className="text-center py-16">
+          <div className="w-16 h-16 bg-white border border-slate-200 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm">
+            <FlaskConical size={26} className="text-slate-300" />
+          </div>
+          <p className="font-semibold text-slate-600">
             {cols === 0 ? 'Agrega al menos 2 fármacos para comparar' : 'Agrega un fármaco más para comenzar'}
           </p>
+          <p className="text-xs text-slate-400 mt-1">Busca por nombre comercial, principio activo o laboratorio</p>
         </div>
       )}
 
       {!isPro && cols >= 2 && (
-        <section className="rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50 to-indigo-50 p-5 shadow-sm space-y-4">
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm space-y-4">
           <div className="flex items-start gap-3">
-            <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center border border-blue-100 shrink-0">
-              <Brain size={18} className="text-blue-600" />
+            <div className="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center shrink-0">
+              <Brain size={17} className="text-slate-600" />
             </div>
             <div className="flex-1">
-              <h2 className="font-semibold text-blue-900">Vista previa del análisis clínico</h2>
-              <p className="mt-1 text-sm text-blue-700">
-                En Pro se genera un análisis con perfil del paciente, evidencia, embarazo/lactancia, posología y PDF.
+              <h2 className="font-semibold text-slate-900">Análisis clínico con IA</h2>
+              <p className="mt-0.5 text-sm text-slate-500">
+                Disponible en Pro: perfil del paciente, evidencia, posología, seguridad y exportación PDF.
               </p>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div className="rounded-xl border border-blue-100 bg-white p-3">
-              <p className="text-[11px] font-semibold uppercase tracking-wide text-blue-500">Perfil</p>
-              <p className="mt-1 text-sm text-gray-700">Ajuste por edad, función renal/hepática y contexto clínico.</p>
+          <div className="grid grid-cols-3 gap-2.5">
+            <div className="rounded-xl bg-slate-50 border border-slate-100 p-3">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Perfil</p>
+              <p className="text-xs text-slate-600 leading-4">Edad, función renal/hepática y contexto.</p>
             </div>
-            <div className="rounded-xl border border-blue-100 bg-white p-3">
-              <p className="text-[11px] font-semibold uppercase tracking-wide text-blue-500">Seguridad</p>
-              <p className="mt-1 text-sm text-gray-700">Embarazo, lactancia, efectos adversos y sustitución urgente.</p>
+            <div className="rounded-xl bg-slate-50 border border-slate-100 p-3">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Seguridad</p>
+              <p className="text-xs text-slate-600 leading-4">Embarazo, lactancia y efectos adversos.</p>
             </div>
-            <div className="rounded-xl border border-blue-100 bg-white p-3">
-              <p className="text-[11px] font-semibold uppercase tracking-wide text-blue-500">Salida</p>
-              <p className="mt-1 text-sm text-gray-700">Resumen clínico y exportación PDF para ficha o justificación.</p>
+            <div className="rounded-xl bg-slate-50 border border-slate-100 p-3">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Salida</p>
+              <p className="text-xs text-slate-600 leading-4">Resumen clínico y exportación PDF.</p>
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 rounded-xl border border-blue-100 bg-white p-4">
-            <div className="flex items-center gap-2">
-              <Lock size={14} className="text-blue-500" />
-              <p className="text-sm text-blue-700">Estas funciones están disponibles en Pro.</p>
-            </div>
+          <div className="flex items-center justify-between gap-3 rounded-xl bg-slate-900 px-4 py-3">
+            <p className="text-sm font-medium text-slate-300">Funciones exclusivas de Pro</p>
             <Link
               href="/pro"
-              className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 transition-colors"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-white text-slate-900 px-4 py-2 text-xs font-bold hover:bg-slate-100 transition-colors whitespace-nowrap"
             >
-              <Zap size={14} />
+              <Zap size={11} className="text-blue-600" fill="currentColor" />
               Ver Pro
             </Link>
           </div>
@@ -516,47 +518,49 @@ function CompareContent() {
       )}
 
       {isPro && cols >= 2 && (
-        <section className="bg-white rounded-2xl p-4 border border-gray-200 shadow-sm space-y-4">
+        <section className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-4">
           <div className="flex items-start justify-between gap-3">
-            <div className="flex items-start gap-2">
-              <UserRound size={18} className="mt-0.5 text-blue-600" />
+            <div className="flex items-start gap-2.5">
+              <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center shrink-0 mt-0.5">
+                <UserRound size={15} className="text-slate-500" />
+              </div>
               <div>
-                <h2 className="font-semibold text-gray-900">Perfil del paciente</h2>
-                <p className="text-xs text-gray-500">Usa estos datos para afinar la comparación médica con IA.</p>
+                <h2 className="font-semibold text-slate-900">Perfil del paciente</h2>
+                <p className="text-xs text-slate-400 mt-0.5">Afina la comparación clínica con IA.</p>
               </div>
             </div>
             <button
               onClick={handleSaveComparison}
-              className="inline-flex items-center gap-2 text-xs font-semibold text-blue-700 bg-blue-50 border border-blue-100 rounded-full px-3 py-1.5 hover:bg-blue-100 transition-colors"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 bg-slate-100 border border-slate-200 rounded-full px-3 py-1.5 hover:bg-slate-200 transition-colors"
             >
-              <Save size={12} />
-              Guardar comparación
+              <Save size={11} />
+              Guardar
             </button>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            <label className="space-y-1">
-              <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">Etiqueta</span>
+            <label className="space-y-1.5">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Etiqueta</span>
               <input
                 value={comparisonLabel}
                 onChange={e => setComparisonLabel(e.target.value)}
                 placeholder="Ej: HTA en adulto mayor"
-                className="w-full h-11 rounded-xl border border-gray-200 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-800 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </label>
-            <label className="space-y-1">
-              <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">Edad</span>
+            <label className="space-y-1.5">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Edad</span>
               <input
                 value={profile.age}
                 onChange={e => setProfile(prev => ({ ...prev, age: e.target.value }))}
                 type="number"
                 min="0"
                 placeholder="Ej: 72"
-                className="w-full h-11 rounded-xl border border-gray-200 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-800 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </label>
-            <label className="space-y-1">
-              <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">Peso</span>
+            <label className="space-y-1.5">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Peso</span>
               <input
                 value={profile.weight}
                 onChange={e => setProfile(prev => ({ ...prev, weight: e.target.value }))}
@@ -564,15 +568,15 @@ function CompareContent() {
                 min="0"
                 step="0.1"
                 placeholder="Ej: 68"
-                className="w-full h-11 rounded-xl border border-gray-200 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-800 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </label>
-            <label className="space-y-1">
-              <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">Función renal</span>
+            <label className="space-y-1.5">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Función renal</span>
               <select
                 value={profile.renalFunction}
                 onChange={e => setProfile(prev => ({ ...prev, renalFunction: e.target.value }))}
-                className="w-full h-11 rounded-xl border border-gray-200 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option>No informado</option>
                 <option>Normal</option>
@@ -582,12 +586,12 @@ function CompareContent() {
                 <option>Diálisis</option>
               </select>
             </label>
-            <label className="space-y-1">
-              <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">Función hepática</span>
+            <label className="space-y-1.5">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Función hepática</span>
               <select
                 value={profile.hepaticFunction}
                 onChange={e => setProfile(prev => ({ ...prev, hepaticFunction: e.target.value }))}
-                className="w-full h-11 rounded-xl border border-gray-200 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option>No informado</option>
                 <option>Normal</option>
@@ -596,12 +600,12 @@ function CompareContent() {
                 <option>Severo</option>
               </select>
             </label>
-            <label className="space-y-1">
-              <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">Embarazo</span>
+            <label className="space-y-1.5">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Embarazo</span>
               <select
                 value={profile.pregnancy}
                 onChange={e => setProfile(prev => ({ ...prev, pregnancy: e.target.value }))}
-                className="w-full h-11 rounded-xl border border-gray-200 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option>No informado</option>
                 <option>No</option>
@@ -611,12 +615,12 @@ function CompareContent() {
                 <option>Semana 28-40</option>
               </select>
             </label>
-            <label className="space-y-1">
-              <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">Lactancia</span>
+            <label className="space-y-1.5">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Lactancia</span>
               <select
                 value={profile.lactation}
                 onChange={e => setProfile(prev => ({ ...prev, lactation: e.target.value }))}
-                className="w-full h-11 rounded-xl border border-gray-200 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option>No informado</option>
                 <option>No</option>
@@ -631,38 +635,38 @@ function CompareContent() {
               value={profile.clinicalContext}
               onChange={e => setProfile(prev => ({ ...prev, clinicalContext: e.target.value }))}
               placeholder="Ej: paciente con HTA y tos con IECA, busca alternativa de mejor tolerancia."
-              className="w-full min-h-[88px] rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full min-h-[88px] rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </label>
 
-          <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex flex-col sm:flex-row gap-2.5">
             <button
               onClick={generateComparisonInsights}
               disabled={isGeneratingInsights || cols < 2}
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-gray-900 px-4 py-3 text-sm font-semibold text-white hover:bg-gray-800 disabled:opacity-60"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white hover:bg-slate-800 transition-colors disabled:opacity-50 shadow-sm"
             >
-              <Brain size={16} />
+              <Brain size={15} />
               {isGeneratingInsights ? 'Analizando...' : 'Generar análisis clínico'}
             </button>
             <button
               onClick={handleExportPdf}
               disabled={cols < 2}
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-60"
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors disabled:opacity-50"
             >
-              <Download size={16} className="text-blue-600" />
+              <Download size={15} className="text-blue-600" />
               Exportar PDF
             </button>
           </div>
 
           {savedComparisons.length > 0 && (
-            <div className="border-t border-gray-100 pt-4">
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">Comparaciones guardadas</p>
+            <div className="border-t border-slate-100 pt-4">
+              <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">Comparaciones guardadas</p>
               <div className="flex flex-wrap gap-2">
                 {savedComparisons.map(saved => (
                   <button
                     key={saved.id}
                     onClick={() => handleLoadSavedComparison(saved)}
-                    className="rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100"
+                    className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100 transition-colors"
                   >
                     {saved.label}
                   </button>
@@ -680,19 +684,21 @@ function CompareContent() {
       )}
 
       {isPro && insights?.summary && (
-        <section className="rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50 to-indigo-50 p-4 shadow-sm space-y-3">
-          <div className="flex items-center gap-2">
-            <Brain size={16} className="text-blue-600" />
-            <h2 className="font-semibold text-blue-900">Análisis clínico</h2>
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm space-y-3">
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 bg-blue-50 rounded-lg flex items-center justify-center">
+              <Brain size={14} className="text-blue-600" />
+            </div>
+            <h2 className="font-semibold text-slate-900">Análisis clínico</h2>
           </div>
-          <p className="text-sm leading-6 text-blue-900/90">{insights.summary}</p>
+          <p className="text-sm leading-6 text-slate-700">{insights.summary}</p>
           {insights.profileSummary && (
-            <p className="text-sm leading-6 text-blue-800">{insights.profileSummary}</p>
+            <p className="text-sm leading-6 text-slate-600">{insights.profileSummary}</p>
           )}
           {insights.bestMatch?.reason && (
-            <div className="rounded-xl border border-blue-100 bg-white/80 p-3 text-sm">
-              <p className="text-[11px] font-semibold uppercase tracking-wide text-blue-500">Mejor ajuste sugerido</p>
-              <p className="mt-1 text-gray-700">{insights.bestMatch.reason}</p>
+            <div className="rounded-xl border border-blue-100 bg-blue-50 p-3">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-blue-500 mb-1">Mejor ajuste sugerido</p>
+              <p className="text-sm text-slate-700">{insights.bestMatch.reason}</p>
             </div>
           )}
         </section>
@@ -700,9 +706,11 @@ function CompareContent() {
 
       {isPro && (insights?.medications?.length ?? 0) > 0 && (
         <section className="space-y-3">
-          <div className="flex items-center gap-2">
-            <Brain size={16} className="text-indigo-600" />
-            <h2 className="font-semibold text-gray-900">Comparación clínica por fármaco</h2>
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 bg-slate-100 rounded-lg flex items-center justify-center">
+              <Brain size={14} className="text-slate-600" />
+            </div>
+            <h2 className="font-semibold text-slate-900">Comparación clínica por fármaco</h2>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {seleccionados.map(med => {
@@ -710,19 +718,19 @@ function CompareContent() {
               if (!insight) return null
 
               return (
-                <article key={med.id} className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm space-y-3">
+                <article key={med.id} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm space-y-3">
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <p className="text-sm font-semibold text-gray-900">{med.nombre}</p>
-                      <p className="text-xs text-gray-500">{med.principioActivo}</p>
+                      <p className="text-sm font-bold text-slate-900">{med.nombre}</p>
+                      <p className="text-xs text-slate-500">{med.principioActivo}</p>
                     </div>
                     {insight.profileFit?.label && (
-                      <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${
+                      <span className={`rounded-full px-2.5 py-1 text-[11px] font-bold border ${
                         insight.profileFit.label === 'Preferible'
-                          ? 'bg-green-50 text-green-700'
+                          ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
                           : insight.profileFit.label === 'Evitar'
-                            ? 'bg-red-50 text-red-700'
-                            : 'bg-amber-50 text-amber-700'
+                            ? 'bg-red-50 text-red-700 border-red-100'
+                            : 'bg-amber-50 text-amber-700 border-amber-100'
                       }`}>
                         {insight.profileFit.label}
                       </span>
@@ -730,54 +738,54 @@ function CompareContent() {
                   </div>
 
                   {insight.profileFit?.reasons?.length ? (
-                    <ul className="space-y-1 text-xs text-gray-600">
+                    <ul className="space-y-1">
                       {insight.profileFit.reasons.map((reason, i) => (
-                        <li key={i} className="flex gap-2">
-                          <span className="mt-0.5 text-blue-500">•</span>
+                        <li key={i} className="flex gap-2 text-xs text-slate-600">
+                          <span className="mt-0.5 text-blue-400 shrink-0">•</span>
                           <span>{reason}</span>
                         </li>
                       ))}
                     </ul>
                   ) : null}
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div className="rounded-xl bg-gray-50 p-3">
-                      <p className="text-[10px] uppercase tracking-wide text-gray-400">Evidencia</p>
-                      <p className="mt-1 text-sm font-semibold text-gray-800">{insight.evidence?.level ?? '—'}</p>
-                      <p className="mt-1 text-xs leading-5 text-gray-600">{insight.evidence?.summary ?? 'Sin resumen disponible'}</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <div className="rounded-xl bg-slate-50 border border-slate-100 p-3">
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Evidencia</p>
+                      <p className="mt-1 text-sm font-semibold text-slate-800">{insight.evidence?.level ?? '—'}</p>
+                      <p className="mt-1 text-xs leading-5 text-slate-500">{insight.evidence?.summary ?? 'Sin resumen disponible'}</p>
                     </div>
-                    <div className="rounded-xl bg-gray-50 p-3">
-                      <p className="text-[10px] uppercase tracking-wide text-gray-400">Vía y posología</p>
-                      <p className="mt-1 text-sm font-semibold text-gray-800">
+                    <div className="rounded-xl bg-slate-50 border border-slate-100 p-3">
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Vía y posología</p>
+                      <p className="mt-1 text-sm font-semibold text-slate-800">
                         {insight.posology?.route ?? '—'} · {insight.posology?.frequency ?? '—'}
                       </p>
-                      <p className="mt-1 text-xs leading-5 text-gray-600">{insight.posology?.notes ?? 'Sin nota de posología'}</p>
+                      <p className="mt-1 text-xs leading-5 text-slate-500">{insight.posology?.notes ?? 'Sin nota de posología'}</p>
                     </div>
-                    <div className="rounded-xl bg-gray-50 p-3">
-                      <p className="text-[10px] uppercase tracking-wide text-gray-400">Efectos adversos</p>
-                      <p className="mt-1 text-sm font-semibold text-gray-800">{insight.adverseEffects?.severity ?? '—'}</p>
-                      <p className="mt-1 text-xs leading-5 text-gray-600">{insight.adverseEffects?.visualSummary ?? 'Sin resumen visual'}</p>
+                    <div className="rounded-xl bg-slate-50 border border-slate-100 p-3">
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Efectos adversos</p>
+                      <p className="mt-1 text-sm font-semibold text-slate-800">{insight.adverseEffects?.severity ?? '—'}</p>
+                      <p className="mt-1 text-xs leading-5 text-slate-500">{insight.adverseEffects?.visualSummary ?? 'Sin resumen visual'}</p>
                       {insight.adverseEffects?.common?.length ? (
-                        <p className="mt-2 text-[11px] text-orange-700">{insight.adverseEffects.common.slice(0, 3).join(' · ')}</p>
+                        <p className="mt-2 text-[11px] text-amber-700 font-medium">{insight.adverseEffects.common.slice(0, 3).join(' · ')}</p>
                       ) : null}
                     </div>
-                    <div className="rounded-xl bg-gray-50 p-3">
-                      <p className="text-[10px] uppercase tracking-wide text-gray-400">Embarazo y lactancia</p>
-                      <p className="mt-1 text-sm font-semibold text-gray-800">{insight.pregnancy ?? '—'} / {insight.lactation ?? '—'}</p>
-                      <p className="mt-1 text-xs leading-5 text-gray-600">
+                    <div className="rounded-xl bg-slate-50 border border-slate-100 p-3">
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Embarazo y lactancia</p>
+                      <p className="mt-1 text-sm font-semibold text-slate-800">{insight.pregnancy ?? '—'} / {insight.lactation ?? '—'}</p>
+                      <p className="mt-1 text-xs leading-5 text-slate-500">
                         Inicio de efecto: {insight.onset ?? 'no definido'}
                       </p>
                     </div>
                   </div>
 
-                  <div className="rounded-xl border border-blue-100 bg-blue-50 p-3">
-                    <p className="text-[10px] uppercase tracking-wide text-blue-500">Costo</p>
-                    <p className="mt-1 text-sm font-semibold text-blue-900">
+                  <div className="rounded-xl border border-slate-200 bg-white p-3">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Costo</p>
+                    <p className="mt-1 text-sm font-semibold text-slate-900">
                       {insight.cost?.referencePriceClp
                         ? `$${insight.cost.referencePriceClp.toLocaleString('es-CL')} CLP`
                         : 'Sin precio de referencia'}
                     </p>
-                    <p className="mt-1 text-xs leading-5 text-blue-800">{insight.cost?.comment ?? 'Sin comentario de costo'}</p>
+                    <p className="mt-1 text-xs leading-5 text-slate-500">{insight.cost?.comment ?? 'Sin comentario de costo'}</p>
                   </div>
                 </article>
               )
@@ -787,32 +795,36 @@ function CompareContent() {
       )}
 
       {isPro && insights?.urgentSubstitution?.summary && (
-        <section className="rounded-2xl border border-amber-100 bg-amber-50 p-4 shadow-sm space-y-3">
-          <div className="flex items-center gap-2">
-            <Zap size={16} className="text-amber-600" />
-            <h2 className="font-semibold text-amber-900">Modo sustitución urgente</h2>
+        <section className="rounded-2xl border border-amber-200 bg-amber-50 p-4 shadow-sm space-y-3">
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 bg-amber-100 rounded-lg flex items-center justify-center">
+              <Zap size={13} className="text-amber-600" fill="currentColor" />
+            </div>
+            <h2 className="font-semibold text-amber-900">Sustitución urgente</h2>
           </div>
-          <p className="text-sm leading-6 text-amber-900/90">{insights.urgentSubstitution.summary}</p>
+          <p className="text-sm leading-6 text-amber-800">{insights.urgentSubstitution.summary}</p>
         </section>
       )}
 
       {/* Tabla */}
       {cols >= 2 && (
-        <div className="overflow-x-auto -mx-4 px-4">
-          <table className="w-full min-w-[360px] bg-white rounded-2xl border border-gray-200 shadow-sm text-sm overflow-hidden">
+        <div className="space-y-2">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Tabla comparativa</p>
+          <div className="overflow-x-auto -mx-4 px-4">
+          <table className="w-full min-w-[360px] bg-white rounded-2xl border border-slate-200 shadow-sm text-sm overflow-hidden">
             <thead>
-              <tr className="bg-gray-50 border-b border-gray-200">
-                <th className="p-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wide w-28 sticky left-0 bg-gray-50">
+              <tr className="border-b border-slate-100">
+                <th className="p-3 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest w-28 sticky left-0 bg-slate-50">
                   Campo
                 </th>
-                {seleccionados.map(med => (
-                  <th key={med.id} className="p-3 text-left min-w-[160px]">
+                {seleccionados.map((med, idx) => (
+                  <th key={med.id} className={`p-3 text-left min-w-[160px] ${idx === 0 ? 'bg-blue-50/50' : 'bg-slate-50/80'}`}>
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0">
-                        <p className="font-semibold text-gray-900 text-xs leading-snug">{med.nombre}</p>
-                        <p className="text-gray-400 text-[10px] mt-0.5">{med.principioActivo}</p>
+                        <p className="font-bold text-slate-900 text-xs leading-snug">{med.nombre}</p>
+                        <p className="text-slate-500 text-[10px] mt-0.5 font-medium">{med.principioActivo}</p>
                       </div>
-                      <button onClick={() => handleRemove(med.id)} className="text-gray-300 hover:text-red-400 transition-colors shrink-0">
+                      <button onClick={() => handleRemove(med.id)} className="text-gray-300 hover:text-red-400 transition-colors shrink-0 p-0.5 rounded hover:bg-red-50">
                         <X size={13} />
                       </button>
                     </div>
@@ -822,41 +834,41 @@ function CompareContent() {
             </thead>
             <tbody>
               {FILAS.map(({ label, key }) => (
-                <tr key={key} className="border-b border-gray-100 hover:bg-gray-50">
-                  <td className="p-3 text-xs font-medium text-gray-400 sticky left-0 bg-white">{label}</td>
-                  {seleccionados.map(med => (
-                    <td key={med.id} className="p-3 text-xs text-gray-700">
-                      {(med[key] as string) || <span className="text-gray-300">—</span>}
+                <tr key={key} className="border-b border-gray-50 hover:bg-gray-50/50">
+                  <td className="p-3 text-xs font-semibold text-gray-400 sticky left-0 bg-white">{label}</td>
+                  {seleccionados.map((med, idx) => (
+                    <td key={med.id} className={`p-3 text-xs text-gray-700 font-medium ${idx === 0 ? 'bg-blue-50/20' : 'bg-indigo-50/10'}`}>
+                      {(med[key] as string) || <span className="text-gray-300 font-normal">—</span>}
                     </td>
                   ))}
                 </tr>
               ))}
 
               {/* Precio */}
-              <tr className="border-b border-gray-100 hover:bg-gray-50">
-                <td className="p-3 text-xs font-medium text-gray-400 sticky left-0 bg-white">Precio ref.</td>
-                {seleccionados.map(med => (
-                  <td key={med.id} className="p-3 text-xs font-semibold text-gray-800">
+              <tr className="border-b border-gray-50 hover:bg-gray-50/50">
+                <td className="p-3 text-xs font-semibold text-gray-400 sticky left-0 bg-white">Precio ref.</td>
+                {seleccionados.map((med, idx) => (
+                  <td key={med.id} className={`p-3 text-xs font-semibold text-gray-800 ${idx === 0 ? 'bg-blue-50/20' : 'bg-indigo-50/10'}`}>
                     {med.precioReferencia ? `$${med.precioReferencia.toLocaleString('es-CL')}` : <span className="text-gray-300 font-normal">—</span>}
                   </td>
                 ))}
               </tr>
 
               {/* Interacciones */}
-              <tr className="border-b border-gray-100 hover:bg-gray-50">
-                <td className="p-3 text-xs font-medium text-gray-400 sticky left-0 bg-white">Interacciones</td>
-                {seleccionados.map(med => (
-                  <td key={med.id} className={`p-3 text-xs font-semibold ${interaccionesStyle[med.nivelInteracciones ?? ''] ?? 'text-gray-800'}`}>
+              <tr className="border-b border-gray-50 hover:bg-gray-50/50">
+                <td className="p-3 text-xs font-semibold text-gray-400 sticky left-0 bg-white">Interacciones</td>
+                {seleccionados.map((med, idx) => (
+                  <td key={med.id} className={`p-3 text-xs font-semibold ${interaccionesStyle[med.nivelInteracciones ?? ''] ?? 'text-gray-800'} ${idx === 0 ? 'bg-blue-50/20' : 'bg-indigo-50/10'}`}>
                     {med.nivelInteracciones ?? <span className="text-gray-300 font-normal">—</span>}
                   </td>
                 ))}
               </tr>
 
               {/* Efectos adversos */}
-              <tr className="border-b border-gray-100">
-                <td className="p-3 text-xs font-medium text-gray-400 sticky left-0 bg-white align-top">Ef. adversos</td>
-                {seleccionados.map(med => (
-                  <td key={med.id} className="p-3 align-top">
+              <tr className="border-b border-gray-50">
+                <td className="p-3 text-xs font-semibold text-gray-400 sticky left-0 bg-white align-top">Ef. adversos</td>
+                {seleccionados.map((med, idx) => (
+                  <td key={med.id} className={`p-3 align-top ${idx === 0 ? 'bg-blue-50/20' : 'bg-indigo-50/10'}`}>
                     {med.efectosAdversos?.length ? (
                       <ul className="space-y-1">
                         {med.efectosAdversos.slice(0, 3).map((ef, i) => (
@@ -873,9 +885,9 @@ function CompareContent() {
 
               {/* Contraindicaciones */}
               <tr>
-                <td className="p-3 text-xs font-medium text-gray-400 sticky left-0 bg-white align-top">Contraind.</td>
-                {seleccionados.map(med => (
-                  <td key={med.id} className="p-3 align-top">
+                <td className="p-3 text-xs font-semibold text-gray-400 sticky left-0 bg-white align-top">Contraind.</td>
+                {seleccionados.map((med, idx) => (
+                  <td key={med.id} className={`p-3 align-top ${idx === 0 ? 'bg-blue-50/20' : 'bg-indigo-50/10'}`}>
                     {med.contraindicaciones?.length ? (
                       <ul className="space-y-1">
                         {med.contraindicaciones.slice(0, 3).map((ci, i) => (
@@ -891,13 +903,14 @@ function CompareContent() {
               </tr>
             </tbody>
           </table>
+          </div>
         </div>
       )}
 
       {cols >= 2 && (
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap gap-3 pt-1">
           {seleccionados.map(med => (
-            <Link key={med.id} href={`/medicamentos/${med.id}`} className="text-xs text-blue-600 hover:underline">
+            <Link key={med.id} href={`/medicamentos/${med.id}`} className="text-xs text-blue-600 hover:underline font-medium">
               Ver detalle de {med.nombre} →
             </Link>
           ))}

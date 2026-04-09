@@ -58,7 +58,7 @@ export default function AcercaDePage() {
         <h2 className="text-xl font-semibold text-gray-900">Cómo usarla en esta etapa</h2>
         <div className="grid gap-3 md:grid-cols-2">
           {[
-            'Buscar por nombre comercial o principio activo.',
+            'Buscar por nombre comercial, principio activo o laboratorio.',
             'Comparar fármacos y revisar si la información clínica te resulta útil.',
             'Enviar feedback desde la app con problemas, ideas o faltantes.',
             'Evitar introducir datos reales si solo estás haciendo pruebas.',

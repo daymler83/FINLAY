@@ -8,7 +8,7 @@ interface SearchBarProps {
   autoFocus?: boolean
 }
 
-export default function SearchBar({ onSearch, placeholder = 'Buscar por nombre o principio activo...', autoFocus }: SearchBarProps) {
+export default function SearchBar({ onSearch, placeholder = 'Buscar por nombre, principio activo o laboratorio...', autoFocus }: SearchBarProps) {
   const [value, setValue] = useState('')
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 

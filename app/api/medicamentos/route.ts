@@ -45,6 +45,7 @@ export async function GET(request: NextRequest) {
     where.OR = [
       { nombre:          { contains: q, mode: 'insensitive' } },
       { principioActivo: { contains: q, mode: 'insensitive' } },
+      { laboratorio:     { contains: q, mode: 'insensitive' } },
       { familia:         { contains: q, mode: 'insensitive' } },
     ]
   }

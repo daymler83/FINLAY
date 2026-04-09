@@ -1,5 +1,5 @@
 import crypto from 'node:crypto'
-import MercadoPagoConfig, { Payment, Preference } from 'mercadopago'
+import MercadoPagoConfig, { Payment, PreApproval, Preference } from 'mercadopago'
 import { NextRequest } from 'next/server'
 import { PRO_PLANS, getProPlanByAmount, resolveProPlanKey, type ProPlanKey } from '@/lib/proAccess'
 
@@ -22,6 +22,7 @@ export function createMercadoPagoClients() {
 
   return {
     payment: new Payment(config),
+    preApproval: new PreApproval(config),
     preference: new Preference(config),
   }
 }
@@ -33,51 +34,31 @@ export function getMercadoPagoBaseUrls(baseUrl: string) {
     success: `${normalizedBaseUrl}/pro/success?provider=mercadopago`,
     pending: `${normalizedBaseUrl}/pro/success?provider=mercadopago`,
     failure: `${normalizedBaseUrl}/pro?payment=failed&provider=mercadopago`,
-    webhook: `${normalizedBaseUrl}/api/mercadopago/webhook`,
   }
 }
 
-export async function createMercadoPagoPreference(params: {
+export async function createMercadoPagoSubscription(params: {
   userId: string
   email: string
   baseUrl: string
   planKey: ProPlanKey
 }) {
-  const { preference } = createMercadoPagoClients()
+  const { preApproval } = createMercadoPagoClients()
   const urls = getMercadoPagoBaseUrls(params.baseUrl)
   const plan = PRO_PLANS[params.planKey] ?? PRO_PLANS.monthly
   const price = plan.key === 'annual' ? ANNUAL_PRICE : MONTHLY_PRICE
 
-  const result = await preference.create({
+  const result = await preApproval.create({
     body: {
-      items: [
-        {
-          id: `finlay-pro-${plan.key}`,
-          title: `FINLAY Pro ${plan.label}`,
-          description: `${plan.subtitle}.`,
-          quantity: 1,
-          unit_price: price,
-          currency_id: DEFAULT_CURRENCY,
-        },
-      ],
+      reason: `FINLAY Pro ${plan.label}`,
+      back_url: `${urls.success}&plan=${plan.key}`,
       external_reference: params.userId,
-      payer: {
-        email: params.email,
-      },
-      back_urls: {
-        success: `${urls.success}&plan=${plan.key}`,
-        pending: `${urls.pending}&plan=${plan.key}`,
-        failure: urls.failure,
-      },
-      notification_url: urls.webhook,
-      binary_mode: true,
-      statement_descriptor: 'FINLAY PRO',
-      metadata: {
-        product: 'finlay-pro',
-        userId: params.userId,
-        plan: plan.key,
-        durationDays: plan.durationDays,
-        priceClp: price,
+      payer_email: params.email,
+      auto_recurring: {
+        frequency: plan.durationDays === 365 ? 12 : 1,
+        frequency_type: 'months',
+        transaction_amount: price,
+        currency_id: DEFAULT_CURRENCY,
       },
     },
   })
@@ -126,6 +107,11 @@ export function validateMercadoPagoWebhookSignature(params: {
 export async function fetchMercadoPagoPayment(paymentId: string | number) {
   const { payment } = createMercadoPagoClients()
   return payment.get({ id: paymentId })
+}
+
+export async function fetchMercadoPagoSubscription(subscriptionId: string) {
+  const { preApproval } = createMercadoPagoClients()
+  return preApproval.get({ id: subscriptionId })
 }
 
 export function resolveMercadoPagoPlan(value: unknown, amount?: unknown): ProPlanKey | null {

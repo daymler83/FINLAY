@@ -34,10 +34,19 @@ export type UserProState = {
   isPro: boolean
   proExpiresAt?: Date | string | null
   proPlan?: string | null
+  proSubscriptionStatus?: string | null
 }
+
+const ACTIVE_SUBSCRIPTION_STATUSES = new Set(['authorized', 'active'])
+const INACTIVE_SUBSCRIPTION_STATUSES = new Set(['cancelled', 'canceled', 'paused', 'expired', 'rejected', 'ended'])
 
 export function hasActiveProAccess(user: UserProState | null | undefined, now = new Date()) {
   if (!user?.isPro) return false
+
+  const status = String(user.proSubscriptionStatus ?? '').trim().toLowerCase()
+  if (status && ACTIVE_SUBSCRIPTION_STATUSES.has(status)) return true
+  if (status && INACTIVE_SUBSCRIPTION_STATUSES.has(status)) return false
+
   if (!user.proExpiresAt) return true
 
   const expiresAt = new Date(user.proExpiresAt)

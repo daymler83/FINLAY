@@ -32,6 +32,8 @@ model Usuario {
   nombre                   String?
   isPro                    Boolean             @default(false)
   proPlan                  String?
+  proSubscriptionId        String?             @unique
+  proSubscriptionStatus    String?
   proExpiresAt             DateTime?
   stripeId                 String?
   passwordResetTokenHash   String?

@@ -1,11 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { activateProUser } from '@/lib/payments'
+import { fetchMercadoPagoPayment, fetchMercadoPagoSubscription, shouldEnforceMercadoPagoWebhookSignature, validateMercadoPagoWebhookSignature } from '@/lib/mercadoPago'
 import {
-  fetchMercadoPagoPayment,
-  resolveMercadoPagoPlan,
-  shouldEnforceMercadoPagoWebhookSignature,
-  validateMercadoPagoWebhookSignature,
-} from '@/lib/mercadoPago'
+  syncUserFromMercadoPagoSubscription,
+} from '@/lib/proSubscription'
 
 type MercadoPagoWebhookBody = {
   type?: string
@@ -39,21 +36,21 @@ export async function POST(request: NextRequest) {
   }
 
   const notificationType = payload?.type ?? payload?.topic ?? request.nextUrl.searchParams.get('type')
-  if (notificationType && notificationType !== 'payment') {
+  if (notificationType && !['payment', 'preapproval'].includes(notificationType)) {
     return NextResponse.json({ received: true, ignored: true })
   }
 
-  const paymentId =
+  const resourceId =
     payload?.data?.id ??
     request.nextUrl.searchParams.get('data.id') ??
     request.nextUrl.searchParams.get('data.id_url') ??
     request.nextUrl.searchParams.get('id')
 
-  if (!paymentId) {
-    return NextResponse.json({ error: 'paymentId no recibido' }, { status: 400 })
+  if (!resourceId) {
+    return NextResponse.json({ error: 'resourceId no recibido' }, { status: 400 })
   }
 
-  const signatureValid = validateMercadoPagoWebhookSignature({ request, dataId: paymentId })
+  const signatureValid = validateMercadoPagoWebhookSignature({ request, dataId: resourceId })
   if (!signatureValid && shouldEnforceMercadoPagoWebhookSignature()) {
     return NextResponse.json({ error: 'Firma inválida' }, { status: 401 })
   }
@@ -63,14 +60,34 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const payment = await fetchMercadoPagoPayment(paymentId)
+    if (notificationType === 'preapproval') {
+      const subscription = await fetchMercadoPagoSubscription(String(resourceId))
+      if (!subscription.external_reference) {
+        return NextResponse.json({ received: true, ignored: true })
+      }
 
-    if (payment.status !== 'approved' || !payment.external_reference) {
+      await syncUserFromMercadoPagoSubscription({
+        userId: String(subscription.external_reference),
+        subscription,
+      })
+      return NextResponse.json({ received: true })
+    }
+
+    const payment = await fetchMercadoPagoPayment(resourceId)
+    if (payment.status !== 'approved') {
       return NextResponse.json({ received: true, ignored: true })
     }
 
-    const planKey = resolveMercadoPagoPlan(payment.metadata?.plan, payment.transaction_amount) ?? 'monthly'
-    await activateProUser(payment.external_reference, 'mercadopago', planKey)
+    const subscriptionId = (payment as { subscription_id?: string }).subscription_id
+    if (subscriptionId) {
+      const subscription = await fetchMercadoPagoSubscription(subscriptionId)
+      if (subscription.external_reference) {
+        await syncUserFromMercadoPagoSubscription({
+          userId: String(subscription.external_reference),
+          subscription,
+        })
+      }
+    }
 
     return NextResponse.json({ received: true })
   } catch (error) {

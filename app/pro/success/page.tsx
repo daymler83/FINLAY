@@ -7,11 +7,11 @@ import { useAuth } from '@/hooks/useAuth'
 export default function ProSuccessPage() {
   const { user, mutate } = useAuth()
   const [verifying, setVerifying] = useState(true)
-  const [plan, setPlan] = useState<string | null>(null)
-
-  useEffect(() => {
-    setPlan(new URLSearchParams(window.location.search).get('plan'))
-  }, [])
+  const [plan] = useState(() =>
+    typeof window === 'undefined'
+      ? null
+      : new URLSearchParams(window.location.search).get('plan')
+  )
 
   useEffect(() => {
     let alive = true
@@ -49,16 +49,16 @@ export default function ProSuccessPage() {
 
       <div>
         <div className="inline-flex items-center gap-1 bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm font-medium mb-3">
-          <Zap size={14} /> {user?.isPro ? 'FarmaChile Pro activado' : 'Verificando activación...'}
+          <Zap size={14} /> {user?.isPro ? 'FarmaChile Pro activo' : 'Verificando activación...'}
         </div>
         <h1 className="text-2xl font-bold text-gray-900">
-          {user?.isPro ? `¡Plan ${plan === 'annual' ? 'anual' : 'mensual'} activado!` : 'Procesando tu activación'}
+          {user?.isPro ? `¡Suscripción ${plan === 'annual' ? 'anual' : 'mensual'} activada!` : 'Procesando tu activación'}
         </h1>
         <p className="text-gray-500 mt-2 max-w-xs mx-auto">
           {verifying
             ? 'Estamos confirmando el pago con Mercado Pago. Esto puede tardar unos segundos.'
             : user?.isPro
-            ? `Tu cuenta Pro ha sido activada${user.proExpiresAt ? ` hasta el ${new Intl.DateTimeFormat('es-CL', { dateStyle: 'long' }).format(new Date(user.proExpiresAt))}` : ''}. Ya tienes acceso completo.`
+            ? `Tu suscripción está activa${user.proExpiresAt ? ` y el próximo cobro será el ${new Intl.DateTimeFormat('es-CL', { dateStyle: 'long' }).format(new Date(user.proExpiresAt))}` : ''}. Ya tienes acceso completo.`
             : 'Todavía no pudimos confirmar tu cuenta Pro. Espera un momento y vuelve a intentar.'}
         </p>
       </div>

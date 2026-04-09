@@ -88,8 +88,8 @@ export default function ProPage() {
           <h1 className="text-3xl font-bold text-slate-900 mb-2 tracking-tight">Tu acceso Pro está activo</h1>
           <p className="text-slate-500 text-sm">
             {user.proExpiresAt
-              ? `Tu plan ${user.proPlan === 'annual' ? 'anual' : 'mensual'} vence el ${formatDate(user.proExpiresAt)}.`
-              : 'Tienes acceso de por vida a FINLAY Pro.'}
+              ? `Tu plan ${user.proPlan === 'annual' ? 'anual' : 'mensual'} se renueva automáticamente el ${formatDate(user.proExpiresAt)}.`
+              : 'Tu suscripción está activa y se renueva automáticamente hasta que la canceles.'}
           </p>
         </div>
 
@@ -99,7 +99,7 @@ export default function ProPage() {
               <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Estado actual</p>
               <h2 className="text-xl font-bold text-slate-900">Ya puedes usar todo el catálogo y el análisis clínico</h2>
               <p className="text-sm text-slate-500 mt-2">
-                Si quieres extender tu acceso antes del vencimiento, puedes renovar con mensual o anual.
+                Si quieres cambiar de plan o cancelar, lo haces desde Mercado Pago.
               </p>
             </div>
             <div className="w-14 h-14 bg-emerald-50 border border-emerald-100 rounded-2xl flex items-center justify-center shrink-0">
@@ -246,7 +246,7 @@ export default function ProPage() {
               {loadingPlan === plan.key ? 'Redirigiendo...' : `Elegir ${plan.label.toLowerCase()}`}
             </button>
             <p className={`mt-3 text-xs text-center ${plan.key === 'annual' ? 'text-slate-400' : 'text-slate-400'}`}>
-              Pago único por {plan.durationDays} días, sin renovación automática.
+              Se renueva automáticamente hasta que la canceles.
             </p>
           </article>
         ))}
@@ -303,7 +303,7 @@ export default function ProPage() {
           <Lock size={16} className="text-slate-400" />
         </div>
         <p className="text-sm text-slate-600">
-          Pago seguro con Mercado Pago. Al completarse, tu cuenta se activa automáticamente por el período elegido.
+          Pago seguro con Mercado Pago. La suscripción se renueva automáticamente hasta que la canceles.
         </p>
       </div>
     </div>

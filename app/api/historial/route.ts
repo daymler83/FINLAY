@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSession } from '@/lib/auth'
-import { hasActiveProAccess } from '@/lib/proAccess'
+import { loadSyncedProUser } from '@/lib/proSubscription'
 
 export const dynamic = 'force-dynamic'
 
@@ -9,12 +9,9 @@ export async function GET() {
   const session = await getSession()
   if (!session) return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
 
-  const usuario = await prisma.usuario.findUnique({
-    where: { id: session.userId },
-    select: { isPro: true, proExpiresAt: true },
-  })
+  const usuario = await loadSyncedProUser(session.userId)
 
-  if (!hasActiveProAccess(usuario)) return NextResponse.json({ error: 'Requiere Pro' }, { status: 403 })
+  if (!usuario?.isPro) return NextResponse.json({ error: 'Requiere Pro' }, { status: 403 })
 
   const historial = await prisma.historialBusqueda.findMany({
     where: { usuarioId: session.userId },
@@ -30,12 +27,9 @@ export async function POST(request: NextRequest) {
   const session = await getSession()
   if (!session) return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
 
-  const usuario = await prisma.usuario.findUnique({
-    where: { id: session.userId },
-    select: { isPro: true, proExpiresAt: true },
-  })
+  const usuario = await loadSyncedProUser(session.userId)
 
-  if (!hasActiveProAccess(usuario)) return NextResponse.json({ ok: false })
+  if (!usuario?.isPro) return NextResponse.json({ ok: false })
 
   const { query } = await request.json()
   if (!query?.trim()) return NextResponse.json({ ok: false })

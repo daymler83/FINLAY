@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSession } from '@/lib/auth'
-import { createMercadoPagoPreference } from '@/lib/mercadoPago'
+import { createMercadoPagoSubscription } from '@/lib/mercadoPago'
 import { PRO_PLANS, resolveProPlanKey } from '@/lib/proAccess'
+import { storePendingProSubscription } from '@/lib/proSubscription'
 
 export async function POST(request: NextRequest) {
   const session = await getSession()
@@ -19,20 +20,26 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const preference = await createMercadoPagoPreference({
+    const subscription = await createMercadoPagoSubscription({
       userId: session.userId,
       email: session.email,
       baseUrl,
       planKey,
     })
 
-    if (!preference.init_point) {
-      return NextResponse.json({ error: 'No se pudo generar el checkout de Mercado Pago' }, { status: 500 })
+    if (!subscription.init_point || !subscription.id) {
+      return NextResponse.json({ error: 'No se pudo generar la suscripción de Mercado Pago' }, { status: 500 })
     }
 
+    await storePendingProSubscription({
+      userId: session.userId,
+      subscriptionId: subscription.id,
+      planKey,
+    })
+
     return NextResponse.json({
-      url: preference.init_point,
-      preferenceId: preference.id,
+      url: subscription.init_point,
+      subscriptionId: subscription.id,
       plan: planKey,
       planDetails: PRO_PLANS[planKey],
     })

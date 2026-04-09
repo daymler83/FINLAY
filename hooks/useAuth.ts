@@ -10,6 +10,8 @@ interface User {
   nombre: string | null
   isPro: boolean
   proPlan: string | null
+  proSubscriptionId: string | null
+  proSubscriptionStatus: string | null
   proExpiresAt: string | null
 }
 

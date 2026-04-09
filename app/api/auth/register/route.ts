@@ -36,6 +36,8 @@ export async function POST(request: NextRequest) {
         nombre: usuario.nombre,
         isPro,
         proPlan: usuario.proPlan ?? null,
+        proSubscriptionId: usuario.proSubscriptionId ?? null,
+        proSubscriptionStatus: usuario.proSubscriptionStatus ?? null,
         proExpiresAt: usuario.proExpiresAt?.toISOString() ?? null,
       },
     }, { status: 201 })

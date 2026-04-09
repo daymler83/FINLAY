@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSession } from '@/lib/auth'
+import { hasActiveProAccess } from '@/lib/proAccess'
 
 export const dynamic = 'force-dynamic'
 
@@ -10,10 +11,10 @@ export async function GET() {
 
   const usuario = await prisma.usuario.findUnique({
     where: { id: session.userId },
-    select: { isPro: true },
+    select: { isPro: true, proExpiresAt: true },
   })
 
-  if (!usuario?.isPro) return NextResponse.json({ error: 'Requiere Pro' }, { status: 403 })
+  if (!hasActiveProAccess(usuario)) return NextResponse.json({ error: 'Requiere Pro' }, { status: 403 })
 
   const historial = await prisma.historialBusqueda.findMany({
     where: { usuarioId: session.userId },
@@ -31,10 +32,10 @@ export async function POST(request: NextRequest) {
 
   const usuario = await prisma.usuario.findUnique({
     where: { id: session.userId },
-    select: { isPro: true },
+    select: { isPro: true, proExpiresAt: true },
   })
 
-  if (!usuario?.isPro) return NextResponse.json({ ok: false })
+  if (!hasActiveProAccess(usuario)) return NextResponse.json({ ok: false })
 
   const { query } = await request.json()
   if (!query?.trim()) return NextResponse.json({ ok: false })

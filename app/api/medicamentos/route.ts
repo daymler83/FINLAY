@@ -3,6 +3,7 @@ import { Prisma } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
 import { getSession } from '@/lib/auth'
 import { ClinicalCategory, matchesClinicalCategory, resolveClinicalCategory } from '@/lib/clinicalCategory'
+import { hasActiveProAccess } from '@/lib/proAccess'
 
 const FREE_LIMIT = 10
 const PRO_LIMIT  = 500
@@ -33,11 +34,11 @@ export async function GET(request: NextRequest) {
   const usuario = session
     ? await prisma.usuario.findUnique({
         where: { id: session.userId },
-        select: { isPro: true },
+        select: { isPro: true, proExpiresAt: true },
       })
     : null
 
-  const isPro = usuario?.isPro ?? false
+  const isPro = hasActiveProAccess(usuario)
   const limit  = isPro ? PRO_LIMIT : FREE_LIMIT
 
   const where: Prisma.MedicamentoWhereInput = {}

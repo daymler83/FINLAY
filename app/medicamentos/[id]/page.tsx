@@ -180,7 +180,7 @@ export default function MedicamentoDetalle() {
             <Badge variant="gray">{getClinicalCategoryLabel(med.categoriaClinica)}</Badge>
           )}
           {med.laboratorio && (
-            <Badge variant="gray">
+            <Badge variant="metal">
               <Building2 size={11} className="mr-1" />{med.laboratorio}
             </Badge>
           )}
@@ -305,14 +305,14 @@ export default function MedicamentoDetalle() {
             <h2 className="font-semibold text-blue-800">Contenido exclusivo Pro</h2>
           </div>
           <p className="text-sm text-blue-600 mb-4">
-            Accede a efectos adversos, contraindicaciones y exportar nota clínica. Pago único, sin suscripción mensual.
+            Accede a efectos adversos, contraindicaciones y exportar nota clínica. Elige un plan mensual o anual según tu uso.
           </p>
           <Link
             href={user ? '/pro' : '/login'}
             className="inline-flex items-center gap-2 bg-blue-600 text-white text-sm font-semibold px-5 py-2.5 rounded-xl hover:bg-blue-700 transition-colors min-h-[44px]"
           >
             <Cross size={14} />
-            {user ? 'Obtener Pro — US$20' : 'Iniciar sesión para continuar'}
+            {user ? 'Ver planes Pro' : 'Iniciar sesión para continuar'}
           </Link>
         </section>
       )}

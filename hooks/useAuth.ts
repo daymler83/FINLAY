@@ -9,6 +9,8 @@ interface User {
   email: string
   nombre: string | null
   isPro: boolean
+  proPlan: string | null
+  proExpiresAt: string | null
 }
 
 export function useAuth() {

@@ -1,9 +1,11 @@
 import crypto from 'node:crypto'
 import MercadoPagoConfig, { Payment, Preference } from 'mercadopago'
 import { NextRequest } from 'next/server'
+import { PRO_PLANS, getProPlanByAmount, resolveProPlanKey, type ProPlanKey } from '@/lib/proAccess'
 
 const DEFAULT_CURRENCY = process.env.MERCADOPAGO_CURRENCY_ID ?? 'CLP'
-const PRO_PRICE = Number(process.env.MERCADOPAGO_PRO_PRICE ?? '20000')
+const MONTHLY_PRICE = Number(process.env.MERCADOPAGO_MONTHLY_PRICE ?? String(PRO_PLANS.monthly.priceClp))
+const ANNUAL_PRICE = Number(process.env.MERCADOPAGO_ANNUAL_PRICE ?? String(PRO_PLANS.annual.priceClp))
 
 export function getMercadoPagoConfig() {
   const accessToken = process.env.MERCADOPAGO_ACCESS_TOKEN
@@ -39,19 +41,22 @@ export async function createMercadoPagoPreference(params: {
   userId: string
   email: string
   baseUrl: string
+  planKey: ProPlanKey
 }) {
   const { preference } = createMercadoPagoClients()
   const urls = getMercadoPagoBaseUrls(params.baseUrl)
+  const plan = PRO_PLANS[params.planKey] ?? PRO_PLANS.monthly
+  const price = plan.key === 'annual' ? ANNUAL_PRICE : MONTHLY_PRICE
 
   const result = await preference.create({
     body: {
       items: [
         {
-          id: 'finlay-pro',
-          title: 'FINLAY Pro',
-          description: 'Acceso de por vida a toda la información clínica de FINLAY.',
+          id: `finlay-pro-${plan.key}`,
+          title: `FINLAY Pro ${plan.label}`,
+          description: `${plan.subtitle}.`,
           quantity: 1,
-          unit_price: PRO_PRICE,
+          unit_price: price,
           currency_id: DEFAULT_CURRENCY,
         },
       ],
@@ -60,8 +65,8 @@ export async function createMercadoPagoPreference(params: {
         email: params.email,
       },
       back_urls: {
-        success: urls.success,
-        pending: urls.pending,
+        success: `${urls.success}&plan=${plan.key}`,
+        pending: `${urls.pending}&plan=${plan.key}`,
         failure: urls.failure,
       },
       notification_url: urls.webhook,
@@ -70,6 +75,9 @@ export async function createMercadoPagoPreference(params: {
       metadata: {
         product: 'finlay-pro',
         userId: params.userId,
+        plan: plan.key,
+        durationDays: plan.durationDays,
+        priceClp: price,
       },
     },
   })
@@ -118,6 +126,10 @@ export function validateMercadoPagoWebhookSignature(params: {
 export async function fetchMercadoPagoPayment(paymentId: string | number) {
   const { payment } = createMercadoPagoClients()
   return payment.get({ id: paymentId })
+}
+
+export function resolveMercadoPagoPlan(value: unknown, amount?: unknown): ProPlanKey | null {
+  return resolveProPlanKey(value) ?? getProPlanByAmount(amount)
 }
 
 export function shouldEnforceMercadoPagoWebhookSignature() {

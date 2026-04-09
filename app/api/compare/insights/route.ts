@@ -3,6 +3,7 @@ import crypto from 'node:crypto'
 import OpenAI from 'openai'
 import { prisma } from '@/lib/prisma'
 import { getSession } from '@/lib/auth'
+import { hasActiveProAccess } from '@/lib/proAccess'
 
 export const dynamic = 'force-dynamic'
 
@@ -64,10 +65,10 @@ export async function POST(request: NextRequest) {
 
     const usuario = await prisma.usuario.findUnique({
       where: { id: session.userId },
-      select: { isPro: true },
+      select: { isPro: true, proExpiresAt: true },
     })
 
-    if (!usuario?.isPro) {
+    if (!hasActiveProAccess(usuario)) {
       return NextResponse.json({ error: 'Requiere Pro' }, { status: 403 })
     }
 

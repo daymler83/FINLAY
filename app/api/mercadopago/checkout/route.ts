@@ -1,20 +1,29 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { getSession } from '@/lib/auth'
 import { createMercadoPagoPreference } from '@/lib/mercadoPago'
+import { PRO_PLANS, resolveProPlanKey } from '@/lib/proAccess'
 
-export async function POST() {
+export async function POST(request: NextRequest) {
   const session = await getSession()
   if (!session) {
     return NextResponse.json({ error: 'Debes iniciar sesión primero' }, { status: 401 })
   }
 
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? 'http://localhost:3000'
+  const body = await request.json().catch(() => null)
+  const requestedPlan = body?.plan
+  const planKey = requestedPlan ? resolveProPlanKey(requestedPlan) : 'monthly'
+
+  if (!planKey) {
+    return NextResponse.json({ error: 'Plan inválido' }, { status: 400 })
+  }
 
   try {
     const preference = await createMercadoPagoPreference({
       userId: session.userId,
       email: session.email,
       baseUrl,
+      planKey,
     })
 
     if (!preference.init_point) {
@@ -24,6 +33,8 @@ export async function POST() {
     return NextResponse.json({
       url: preference.init_point,
       preferenceId: preference.id,
+      plan: planKey,
+      planDetails: PRO_PLANS[planKey],
     })
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Error al crear preferencia de Mercado Pago'

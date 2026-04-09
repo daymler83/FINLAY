@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { prisma } from '@/lib/prisma'
 import { createToken, setSessionCookie } from '@/lib/auth'
+import { hasActiveProAccess } from '@/lib/proAccess'
 
 export async function POST(request: NextRequest) {
   try {
@@ -28,10 +29,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Credenciales incorrectas' }, { status: 401 })
     }
 
-    const token = await createToken({ userId: usuario.id, email: usuario.email, isPro: usuario.isPro })
+    const isPro = hasActiveProAccess(usuario)
+    const token = await createToken({ userId: usuario.id, email: usuario.email, isPro })
 
     const response = NextResponse.json({
-      user: { id: usuario.id, email: usuario.email, nombre: usuario.nombre, isPro: usuario.isPro },
+      user: {
+        id: usuario.id,
+        email: usuario.email,
+        nombre: usuario.nombre,
+        isPro,
+        proPlan: usuario.proPlan ?? null,
+        proExpiresAt: usuario.proExpiresAt?.toISOString() ?? null,
+      },
     })
     setSessionCookie(response, token, Boolean(rememberMe))
 

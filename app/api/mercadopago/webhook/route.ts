@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { activateProUser } from '@/lib/payments'
 import {
   fetchMercadoPagoPayment,
+  resolveMercadoPagoPlan,
   shouldEnforceMercadoPagoWebhookSignature,
   validateMercadoPagoWebhookSignature,
 } from '@/lib/mercadoPago'
@@ -68,7 +69,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ received: true, ignored: true })
     }
 
-    await activateProUser(payment.external_reference, 'mercadopago')
+    const planKey = resolveMercadoPagoPlan(payment.metadata?.plan, payment.transaction_amount) ?? 'monthly'
+    await activateProUser(payment.external_reference, 'mercadopago', planKey)
 
     return NextResponse.json({ received: true })
   } catch (error) {

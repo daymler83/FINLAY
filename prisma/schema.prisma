@@ -31,6 +31,8 @@ model Usuario {
   password                 String?
   nombre                   String?
   isPro                    Boolean             @default(false)
+  proPlan                  String?
+  proExpiresAt             DateTime?
   stripeId                 String?
   passwordResetTokenHash   String?
   passwordResetExpiresAt   DateTime?

@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 
 interface BadgeProps {
   children: ReactNode
-  variant?: 'blue' | 'green' | 'red' | 'orange' | 'gray' | 'purple'
+  variant?: 'blue' | 'green' | 'red' | 'orange' | 'gray' | 'purple' | 'metal'
   size?: 'sm' | 'xs'
 }
 
@@ -13,6 +13,7 @@ const variants = {
   orange: 'bg-orange-50 text-orange-700 border-orange-100',
   gray:   'bg-gray-100 text-gray-600 border-gray-200',
   purple: 'bg-purple-50 text-purple-700 border-purple-100',
+  metal:  'bg-gradient-to-b from-slate-200 via-slate-100 to-slate-300 text-slate-800 border-slate-400 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]',
 }
 
 export default function Badge({ children, variant = 'gray', size = 'sm' }: BadgeProps) {

@@ -58,9 +58,11 @@ export default function Home() {
     shouldRetryOnError: false,
     errorRetryCount: 0,
   })
-  const medicamentos = data?.medicamentos ?? []
+  const medicamentos = (data?.medicamentos ?? []).filter(
+    med => typeof med.precioReferencia === 'number' && med.precioReferencia > 0
+  )
   const isPro = user?.isPro ?? data?.isPro ?? false
-  const total = data?.total ?? 0
+  const total = data?.total ?? medicamentos.length
   const limit = data?.limit ?? 10
   const maxComparar = isPro ? 5 : 2
 

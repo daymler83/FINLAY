@@ -35,7 +35,9 @@ export async function GET(request: NextRequest) {
   const isPro = Boolean(usuario?.isPro)
   const limit  = isPro ? PRO_LIMIT : FREE_LIMIT
 
-  const where: Prisma.MedicamentoWhereInput = {}
+  const where: Prisma.MedicamentoWhereInput = {
+    precioReferencia: { gt: 0 },
+  }
   if (q) {
     where.OR = [
       { nombre:          { contains: q, mode: 'insensitive' } },
@@ -56,9 +58,13 @@ export async function GET(request: NextRequest) {
       },
     })
 
+    const medicamentosConPrecio = medicamentosBase.filter(
+      med => typeof med.precioReferencia === 'number' && med.precioReferencia > 0
+    )
+
     const medicamentosFiltrados = categoria
-      ? medicamentosBase.filter(med => matchesClinicalCategory(med.familia, med.principioActivo, categoria as ClinicalCategory))
-      : medicamentosBase
+      ? medicamentosConPrecio.filter(med => matchesClinicalCategory(med.familia, med.principioActivo, categoria as ClinicalCategory))
+      : medicamentosConPrecio
 
     const total = medicamentosFiltrados.length
     const medicamentos = medicamentosFiltrados.slice(0, limit).map((med): MedicamentoConCategoria => ({

@@ -1,5 +1,7 @@
+'use client'
 import Link from 'next/link'
 import Badge from './Badge'
+import { ChevronDown, ArrowRight } from 'lucide-react'
 import { getClinicalCategoryLabel, type ClinicalCategory } from '@/lib/clinicalCategory'
 
 interface DrugCardProps {
@@ -14,7 +16,9 @@ interface DrugCardProps {
   vidaMedia?: string | null
   nivelInteracciones?: string | null
   selected?: boolean
+  expanded?: boolean
   onToggle?: (id: string) => void
+  onExpand?: (id: string) => void
 }
 
 function detectGenerico(nombre: string, principioActivo: string) {
@@ -30,7 +34,7 @@ const interaccionesColor: Record<string, string> = {
 export default function DrugCard({
   id, nombre, principioActivo, presentacion, familia, laboratorio, categoriaClinica,
   precioReferencia, vidaMedia, nivelInteracciones,
-  selected = false, onToggle,
+  selected = false, expanded = false, onToggle, onExpand,
 }: DrugCardProps) {
   const isGenerico = detectGenerico(nombre, principioActivo)
   const familiaPartes = familia ? familia.split('·').map(s => s.trim()) : []
@@ -46,10 +50,13 @@ export default function DrugCard({
         selected ? 'bg-blue-500' : 'bg-transparent'
       }`} />
 
-      <div className="px-4 py-4">
-        {/* Top row: badges + checkbox */}
-        <div className="flex items-start justify-between gap-2 mb-3">
-          <div className="flex flex-wrap items-center gap-1.5">
+      {/* Header colapsado — siempre visible */}
+      <div
+        className="px-4 py-3.5 flex items-center gap-3 cursor-pointer select-none"
+        onClick={() => onExpand?.(id)}
+      >
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-1.5 mb-1">
             <Badge variant={isGenerico ? 'green' : 'purple'} size="xs">
               {isGenerico ? 'Genérico' : 'Marca'}
             </Badge>
@@ -59,11 +66,44 @@ export default function DrugCard({
               </Badge>
             )}
           </div>
+          <Link
+            href={`/medicamentos/${id}`}
+            onClick={e => e.stopPropagation()}
+            className="font-bold text-blue-600 hover:underline text-[15px] leading-snug truncate block"
+          >
+            {nombre}
+          </Link>
+          <p className="text-xs text-slate-400 mt-0.5 flex items-center gap-1.5 flex-wrap">
+            <span className="truncate">{principioActivo}</span>
+            {laboratorio && (
+              <span className="inline-flex items-center px-1.5 py-0.5 rounded-full border border-slate-200 bg-slate-50 text-[10px] font-medium text-slate-500 shrink-0">
+                {laboratorio}
+              </span>
+            )}
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2.5 shrink-0">
+          {precioReferencia ? (
+            <span className="text-sm font-bold text-slate-800 tabular-nums">
+              ${precioReferencia.toLocaleString('es-CL')}
+            </span>
+          ) : (
+            <span className="text-sm text-slate-300">—</span>
+          )}
+
+          <div className="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
+            <ChevronDown
+              size={13}
+              className={`text-slate-500 transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`}
+            />
+          </div>
+
           {onToggle && (
             <button
-              onClick={() => onToggle(id)}
+              onClick={e => { e.stopPropagation(); onToggle(id) }}
               aria-label={selected ? 'Deseleccionar' : 'Seleccionar para comparar'}
-              className={`w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 transition-all ${
+              className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
                 selected
                   ? 'bg-blue-600 border-blue-600'
                   : 'border-slate-300 hover:border-blue-400'
@@ -77,56 +117,52 @@ export default function DrugCard({
             </button>
           )}
         </div>
+      </div>
 
-        {/* Name block */}
-        <Link href={`/medicamentos/${id}`} className="block group">
-          <h3 className="font-bold text-slate-900 text-[15px] leading-snug group-hover:text-blue-600 transition-colors">
-            {nombre}
-          </h3>
-          <p className="text-sm text-slate-500 mt-0.5">{principioActivo}</p>
-
+      {/* Detalle expandido */}
+      <div className={`transition-all duration-200 ease-in-out overflow-hidden ${
+        expanded ? 'max-h-72 opacity-100' : 'max-h-0 opacity-0'
+      }`}>
+        <div className="px-4 pb-4 pt-3 border-t border-slate-100 space-y-3">
           {familia && (
-            <p className="text-xs text-blue-600 mt-1.5 font-medium">
-              {familiaPartes.join(' · ')}
-              {laboratorio && (
-                <span className="ml-1 inline-flex items-center rounded-full border border-slate-400 bg-gradient-to-b from-slate-200 via-slate-100 to-slate-300 px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-slate-800 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]">
-                  {laboratorio}
-                </span>
-              )}
-            </p>
+            <p className="text-xs text-blue-600 font-medium">{familiaPartes.join(' · ')}</p>
           )}
 
-          {/* Data grid */}
-          <dl className="grid grid-cols-2 gap-x-4 gap-y-3 mt-3 pt-3 border-t border-slate-100">
+          <dl className="grid grid-cols-2 gap-x-6 gap-y-3">
             <div>
-              <dt className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Presentación</dt>
+              <dt className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Presentación</dt>
               <dd className="text-sm font-medium text-slate-800 mt-0.5 leading-snug">{presentacion}</dd>
             </div>
-
             <div>
-              <dt className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Precio ref.</dt>
+              <dt className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Precio ref.</dt>
               <dd className="text-sm font-medium text-slate-800 mt-0.5">
                 {precioReferencia
                   ? `$${precioReferencia.toLocaleString('es-CL')}`
                   : <span className="text-slate-300">—</span>}
               </dd>
             </div>
-
             <div>
-              <dt className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Vida media</dt>
+              <dt className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Vida media</dt>
               <dd className="text-sm font-medium text-slate-800 mt-0.5">
                 {vidaMedia ?? <span className="text-slate-300">—</span>}
               </dd>
             </div>
-
             <div>
-              <dt className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Interacciones</dt>
-              <dd className={`text-sm font-semibold mt-0.5 ${interaccionesColor[nivelInteracciones ?? ''] ?? 'text-slate-300'}`}>
+              <dt className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Interacciones</dt>
+              <dd className={`text-sm font-bold mt-0.5 ${interaccionesColor[nivelInteracciones ?? ''] ?? 'text-slate-300'}`}>
                 {nivelInteracciones ?? '—'}
               </dd>
             </div>
           </dl>
-        </Link>
+
+          <Link
+            href={`/medicamentos/${id}`}
+            onClick={e => e.stopPropagation()}
+            className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:underline"
+          >
+            Ver ficha completa <ArrowRight size={11} />
+          </Link>
+        </div>
       </div>
     </div>
   )

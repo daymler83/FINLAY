@@ -43,6 +43,7 @@ export default function Home() {
   const [query, setQuery] = useState('')
   const [categoriaActiva, setCategoriaActiva] = useState('')
   const [seleccionados, setSeleccionados] = useState<string[]>([])
+  const [expandedId, setExpandedId] = useState<string | null>(null)
 
   const filtroEtiqueta = FILTROS.find(f => f.categoria === categoriaActiva)?.label ?? ''
   const busqueda = query || filtroEtiqueta
@@ -86,6 +87,10 @@ export default function Home() {
     setQuery('')
     setSeleccionados([])
   }
+
+  const handleExpand = useCallback((id: string) => {
+    setExpandedId(prev => prev === id ? null : id)
+  }, [])
 
   const handleToggle = (id: string) => {
     setSeleccionados(prev =>
@@ -245,13 +250,15 @@ export default function Home() {
       {/* Grid */}
       {!isLoading && !error && medicamentos.length > 0 && (
         <div id="resultados" className="scroll-mt-24">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
             {medicamentos.map(med => (
               <DrugCard
                 key={med.id}
                 {...med}
                 selected={seleccionados.includes(med.id)}
+                expanded={expandedId === med.id}
                 onToggle={handleToggle}
+                onExpand={handleExpand}
               />
             ))}
           </div>

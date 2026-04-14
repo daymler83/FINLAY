@@ -127,7 +127,24 @@ const FAMILY_RULES = [
 ]
 
 function resolveClassification(record) {
+  const priorityText = normalize([
+    record.nombre,
+    record.nombreLocal,
+    record.principioActivo,
+    record.familia,
+    record.categoriaClinica,
+  ].join(' '))
   const searchText = buildSearchText(record)
+
+  for (const rule of FAMILY_RULES) {
+    if (rule.terms.some(term => priorityText.includes(term))) {
+      return {
+        category: rule.category || 'otros',
+        family: rule.family,
+        matchedTerm: rule.terms.find(term => priorityText.includes(term)) || '',
+      }
+    }
+  }
 
   for (const rule of FAMILY_RULES) {
     if (rule.terms.some(term => searchText.includes(term))) {

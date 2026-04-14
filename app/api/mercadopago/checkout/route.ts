@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSession } from '@/lib/auth'
+import { getAppBaseUrl } from '@/lib/appUrl'
 import { createMercadoPagoSubscription } from '@/lib/mercadoPago'
 import { PRO_PLANS, resolveProPlanKey } from '@/lib/proAccess'
 import { storePendingProSubscription } from '@/lib/proSubscription'
@@ -10,7 +11,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Debes iniciar sesión primero' }, { status: 401 })
   }
 
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? 'http://localhost:3000'
+  const baseUrl = getAppBaseUrl(request)
   const body = await request.json().catch(() => null)
   const requestedPlan = body?.plan
   const planKey = requestedPlan ? resolveProPlanKey(requestedPlan) : 'monthly'

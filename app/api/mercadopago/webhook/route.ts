@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
     request.nextUrl.searchParams.get('id')
 
   if (!resourceId) {
-    return NextResponse.json({ error: 'resourceId no recibido' }, { status: 400 })
+    return NextResponse.json({ received: true, ignored: true, reason: 'resourceId no recibido' })
   }
 
   const signatureValid = validateMercadoPagoWebhookSignature({ request, dataId: resourceId })

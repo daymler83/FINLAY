@@ -6,6 +6,15 @@ export type ClinicalCategory =
   | 'estatina'
   | 'otros'
 
+const CLINICAL_CATEGORIES: ClinicalCategory[] = [
+  'antihipertensivo',
+  'antidiabético',
+  'aine',
+  'antibiótico',
+  'estatina',
+  'otros',
+]
+
 const CATEGORY_LABELS: Record<ClinicalCategory, string> = {
   antihipertensivo: 'Antihipertensivo',
   antidiabético: 'Antidiabético',
@@ -48,6 +57,23 @@ const CATEGORY_MATCHERS: Record<Exclude<ClinicalCategory, 'otros'>, string[]> = 
   ],
 }
 
+export function isClinicalCategory(value: unknown): value is ClinicalCategory {
+  return CLINICAL_CATEGORIES.includes(value as ClinicalCategory)
+}
+
+export function getClinicalCategoryMatchers(category: ClinicalCategory): string[] {
+  if (category === 'otros') return []
+  return CATEGORY_MATCHERS[category]
+}
+
+export function getAllClinicalCategoryMatchers(): string[] {
+  return Array.from(
+    new Set(
+      Object.values(CATEGORY_MATCHERS).flat()
+    )
+  )
+}
+
 export function resolveClinicalCategory(familia: string, principioActivo: string): ClinicalCategory {
   const source = `${familia} ${principioActivo}`.toLowerCase()
 
@@ -68,7 +94,7 @@ export function matchesClinicalCategory(
   principioActivo: string,
   category: ClinicalCategory
 ): boolean {
-  if (category === 'otros') return false
+  if (category === 'otros') return resolveClinicalCategory(familia, principioActivo) === 'otros'
   return resolveClinicalCategory(familia, principioActivo) === category
 }
 

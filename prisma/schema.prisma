@@ -80,6 +80,19 @@ model Feedback {
   @@index([createdAt])
 }
 
+model SidebarEvent {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  date        DateTime?
+  url         String?
+  source      String?
+  type        String    @default("conference")
+  createdAt   DateTime  @default(now())
+
+  @@index([date])
+}
+
 model ComparisonInsightCache {
   id              String   @id @default(cuid())
   requestHash     String   @unique

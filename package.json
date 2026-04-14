@@ -5,9 +5,14 @@
   "scripts": {
     "dev": "next dev --webpack --hostname 127.0.0.1",
     "build": "prisma generate && next build --webpack",
-    "heroku:release": "prisma db push --skip-generate && prisma db seed",
+    "heroku:release": "bash ./scripts/heroku-release.sh",
     "update:precios": "node pipeline/update_precios.js",
     "update:precios:faltantes": "node pipeline/update_precios.js --solo-sin-precio",
+    "import:vademecum:chile": "node pipeline/import_vademecum_chile.js",
+    "generate:vademecum:chile:do": "node pipeline/generate_vademecum_chile_do_sql.js",
+    "reclassify:vademecum:chile": "node pipeline/reclassify_vademecum_chile.js",
+    "reclassify:vademecum:chile:ai": "node pipeline/reclassify_vademecum_chile_ai.js",
+    "download:vademecum:chile": "node pipeline/export_vademecum_chile.js",
     "start": "next start --hostname 0.0.0.0 -p ${PORT:-3000}",
     "lint": "eslint"
   },
@@ -34,6 +39,7 @@
     "next": "^16.2.1",
     "nodemailer": "^8.0.4",
     "openai": "^6.33.0",
+    "prisma": "^5.22.0",
     "puppeteer": "^24.40.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
@@ -50,7 +56,6 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.1",
     "postcss": "^8.5.8",
-    "prisma": "^5.22.0",
     "tailwindcss": "^4.2.2",
     "ts-node": "^10.9.2",
     "typescript": "^5"

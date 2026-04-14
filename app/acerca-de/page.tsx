@@ -4,17 +4,17 @@ import { ArrowLeft, BookOpenText, Stethoscope, ShieldCheck, Pill, FileText } fro
 const sections = [
   {
     title: 'Qué es FINLAY',
-    body: 'FINLAY es una herramienta de consulta rápida para medicamentos disponibles en Chile, pensada para apoyar la revisión clínica y la orientación del producto durante una prueba con colegas.',
+    body: 'FINLAY es una plataforma de información clínica sobre medicamentos disponibles en Chile, con un asistente IA integrado para consultas farmacológicas, búsqueda de literatura académica y un calendario actualizado de eventos del área.',
     icon: BookOpenText,
   },
   {
     title: 'Para quién está pensado',
-    body: 'Está orientado a médicos y profesionales de salud que necesitan revisar fármacos, compararlos y navegar información clínica de forma más rápida.',
+    body: 'Para médicos, farmacéuticos y profesionales de salud que necesitan revisar fármacos, comparar opciones terapéuticas y acceder a evidencia actualizada sin salir de la plataforma.',
     icon: Stethoscope,
   },
   {
     title: 'Qué incluye la versión Pro',
-    body: 'La versión Pro amplía el catálogo, permite comparar más medicamentos y desbloquea funciones de uso más intensivo.',
+    body: 'Catálogo completo con efectos adversos y contraindicaciones, acceso al asistente IA con 500+ medicamentos, búsqueda de papers en PubMed con abstract, y calendario de congresos y conferencias farmacológicas.',
     icon: ShieldCheck,
   },
 ]
@@ -38,9 +38,9 @@ export default function AcercaDePage() {
           <Pill size={14} />
           FINLAY
         </div>
-        <h1 className="mt-4 text-4xl font-bold tracking-tight">Documento breve para entender la app</h1>
+        <h1 className="mt-4 text-4xl font-bold tracking-tight">Información clínica + IA para profesionales de salud</h1>
         <p className="mt-4 max-w-2xl text-sm leading-6 text-blue-100">
-          Esta página resume el propósito de FINLAY, su alcance y cómo usarla durante la etapa de feedback con colegas.
+          FINLAY reúne catálogo de fármacos, asistente IA, papers académicos y eventos del sector en una sola plataforma pensada para Chile.
         </p>
       </section>
 
@@ -55,13 +55,13 @@ export default function AcercaDePage() {
       </div>
 
       <section className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm space-y-4">
-        <h2 className="text-xl font-semibold text-gray-900">Cómo usarla en esta etapa</h2>
+        <h2 className="text-xl font-semibold text-gray-900">Cómo usarla</h2>
         <div className="grid gap-3 md:grid-cols-2">
           {[
             'Buscar por nombre comercial, principio activo o laboratorio.',
-            'Comparar fármacos y revisar si la información clínica te resulta útil.',
-            'Enviar feedback desde la app con problemas, ideas o faltantes.',
-            'Evitar introducir datos reales si solo estás haciendo pruebas.',
+            'Comparar fármacos lado a lado con análisis clínico por IA.',
+            'Consultar al asistente IA sobre dosis, interacciones o contraindicaciones.',
+            'Buscar papers en PubMed y revisar abstracts sin salir de la plataforma.',
           ].map(item => (
             <div key={item} className="rounded-2xl bg-gray-50 p-4 text-sm text-gray-700">
               {item}
@@ -71,10 +71,9 @@ export default function AcercaDePage() {
       </section>
 
       <section className="rounded-3xl border border-blue-100 bg-blue-50 p-6">
-        <h2 className="text-lg font-semibold text-blue-900">Nota importante</h2>
+        <h2 className="text-lg font-semibold text-blue-900">Aviso clínico</h2>
         <p className="mt-2 text-sm leading-6 text-blue-800">
-          FINLAY todavía está en una etapa de validación. La intención de esta versión es recopilar observaciones reales de uso
-          para afinar contenido, navegación y propuesta de valor antes de un despliegue más amplio.
+          FINLAY es una herramienta de apoyo informativo. La información presentada no reemplaza el juicio clínico ni la consulta a fuentes oficiales. El asistente IA puede cometer errores — siempre valida información crítica con fuentes autorizadas.
         </p>
       </section>
     </div>

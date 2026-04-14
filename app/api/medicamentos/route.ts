@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { Prisma } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
 import { getSession } from '@/lib/auth'
-import { ClinicalCategory, matchesClinicalCategory, resolveClinicalCategory } from '@/lib/clinicalCategory'
+import { ClinicalCategory, getAllClinicalCategoryMatchers, getClinicalCategoryMatchers, isClinicalCategory, resolveClinicalCategory } from '@/lib/clinicalCategory'
 import { loadSyncedProUser } from '@/lib/proSubscription'
 
 const FREE_LIMIT = 10
@@ -28,7 +28,12 @@ type MedicamentoConCategoria = MedicamentoBase & {
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const q = searchParams.get('q')
-  const categoria = searchParams.get('categoria')
+  const categoriaRaw = searchParams.get('categoria')
+  const categoria = categoriaRaw && isClinicalCategory(categoriaRaw) ? categoriaRaw : null
+
+  if (categoriaRaw && !categoria) {
+    return NextResponse.json({ error: 'Categoría inválida' }, { status: 400 })
+  }
 
   const session = await getSession()
   const usuario = session ? await loadSyncedProUser(session.userId) : null
@@ -47,27 +52,48 @@ export async function GET(request: NextRequest) {
     ]
   }
 
+  const andFilters: Prisma.MedicamentoWhereInput[] = []
+
+  if (categoria) {
+    const termToFilters = (terms: string[]): Prisma.MedicamentoWhereInput[] => terms.flatMap(term => ([
+      { familia: { contains: term, mode: Prisma.QueryMode.insensitive } },
+      { principioActivo: { contains: term, mode: Prisma.QueryMode.insensitive } },
+    ]))
+
+    if (categoria === 'otros') {
+      const allKnownTerms = getAllClinicalCategoryMatchers()
+      andFilters.push({
+        NOT: {
+          OR: termToFilters(allKnownTerms),
+        },
+      })
+    } else {
+      andFilters.push({
+        OR: termToFilters(getClinicalCategoryMatchers(categoria)),
+      })
+    }
+  }
+
+  if (andFilters.length > 0) {
+    where.AND = andFilters
+  }
+
   try {
-    const medicamentosBase = await prisma.medicamento.findMany({
-      where,
-      orderBy: { nombre: 'asc' },
-      select: {
-        id: true, nombre: true, principioActivo: true,
-        presentacion: true, familia: true, laboratorio: true,
-        precioReferencia: true, vidaMedia: true, nivelInteracciones: true,
-      },
-    })
+    const [total, medicamentosBase] = await prisma.$transaction([
+      prisma.medicamento.count({ where }),
+      prisma.medicamento.findMany({
+        where,
+        orderBy: { nombre: 'asc' },
+        select: {
+          id: true, nombre: true, principioActivo: true,
+          presentacion: true, familia: true, laboratorio: true,
+          precioReferencia: true, vidaMedia: true, nivelInteracciones: true,
+        },
+        take: limit,
+      }),
+    ])
 
-    const medicamentosConPrecio = medicamentosBase.filter(
-      med => typeof med.precioReferencia === 'number' && med.precioReferencia > 0
-    )
-
-    const medicamentosFiltrados = categoria
-      ? medicamentosConPrecio.filter(med => matchesClinicalCategory(med.familia, med.principioActivo, categoria as ClinicalCategory))
-      : medicamentosConPrecio
-
-    const total = medicamentosFiltrados.length
-    const medicamentos = medicamentosFiltrados.slice(0, limit).map((med): MedicamentoConCategoria => ({
+    const medicamentos = medicamentosBase.map((med): MedicamentoConCategoria => ({
       ...med,
       categoriaClinica: resolveClinicalCategory(med.familia, med.principioActivo),
     }))

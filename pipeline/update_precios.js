@@ -122,29 +122,6 @@ function buildSearchQueries(medicamento) {
   return queries.slice(0, 3)
 }
 
-function parsePrice(raw) {
-  if (!raw) return null
-
-  const text = String(raw)
-    .replace(/\s+/g, ' ')
-    .replace(/\u00a0/g, ' ')
-
-  const candidates = [
-    ...text.matchAll(/(?:clp|\$)\s*([0-9][0-9.\s]*)(?:,[0-9]{1,2})?/gi),
-    ...text.matchAll(/\b([0-9]{1,3}(?:[.\s][0-9]{3})+(?:,[0-9]{1,2})?)\b/g),
-    ...text.matchAll(/\b([0-9]{3,7})\b/g),
-  ].map(match => match[1]).filter(Boolean)
-
-  for (const candidate of candidates) {
-    const num = parseInt(candidate.replace(/[^\d]/g, ''), 10)
-    if (Number.isFinite(num) && num >= 100 && num <= 500000) {
-      return num
-    }
-  }
-
-  return null
-}
-
 function extractPresentationHints(presentacion) {
   const normalized = normalizeText(presentacion)
   const hints = []
@@ -234,15 +211,26 @@ async function collectCandidates(page) {
     const parsePrice = (raw) => {
       if (!raw) return null
       const text = String(raw).replace(/\s+/g, ' ').replace(/\u00a0/g, ' ')
+      const normalized = text.toLowerCase()
+      const hasCurrencyContext = /(?:clp|\$|precio|normal|internet|oferta|rebaja)/i.test(normalized)
+      const doseValues = new Set(
+        [...normalized.matchAll(/\b([0-9]+(?:[.,][0-9]+)?)\s*(?:mg|mcg|g|gr|ml|ui|u)\b/gi)]
+          .map(match => parseInt(String(match[1]).replace(/[^\d]/g, ''), 10))
+          .filter(num => Number.isFinite(num))
+      )
+
       const matches = [
         ...text.matchAll(/(?:clp|\$)\s*([0-9][0-9.\s]*)(?:,[0-9]{1,2})?/gi),
         ...text.matchAll(/\b([0-9]{1,3}(?:[.\s][0-9]{3})+(?:,[0-9]{1,2})?)\b/g),
-        ...text.matchAll(/\b([0-9]{3,7})\b/g),
+        ...(hasCurrencyContext ? [...text.matchAll(/\b([0-9]{3,7})\b/g)] : []),
       ]
 
       for (const match of matches) {
-        const num = parseInt(match[1].replace(/[^\d]/g, ''), 10)
+        const rawCandidate = String(match[1] || '')
+        const num = parseInt(rawCandidate.replace(/[^\d]/g, ''), 10)
         if (Number.isFinite(num) && num >= 100 && num <= 500000) {
+          const isLikelyDose = doseValues.has(num) && !rawCandidate.includes('.') && !rawCandidate.includes(',')
+          if (isLikelyDose && !hasCurrencyContext) continue
           return num
         }
       }
@@ -270,12 +258,13 @@ async function collectCandidates(page) {
       const priceNode = card.querySelector(
         '.promotion-badge-container, .sales, .default-price, .price-internet, .strike-through [content], [itemprop="price"], [data-price], [class*="price"]',
       )
-      const price = parsePrice(
+      const priceSource = (
         priceNode?.getAttribute?.('content')
+        || priceNode?.getAttribute?.('data-price')
         || priceNode?.textContent
-        || card.innerText
-        || rawText,
+        || ''
       )
+      const price = parsePrice(priceSource)
 
       if (!price) continue
 
@@ -382,14 +371,29 @@ async function getPrecioMasBarato(browser, medicamento) {
 function parseArgs(argv) {
   const args = argv.slice(2)
   const nombreIndex = args.findIndex((arg, index) => arg === '--nombre' && index < args.length - 1)
+  const limitIndex = args.findIndex((arg, index) => arg === '--limit' && index < args.length - 1)
   const nombre = nombreIndex >= 0 ? args[nombreIndex + 1] : null
+  const limitRaw = limitIndex >= 0 ? Number(args[limitIndex + 1]) : null
+  const limit = Number.isInteger(limitRaw) && limitRaw > 0 ? limitRaw : null
   const soloSinPrecio = args.includes('--solo-sin-precio')
+  const random = args.includes('--random')
 
-  return { nombre, soloSinPrecio }
+  return { nombre, soloSinPrecio, limit, random }
+}
+
+function shuffleInPlace(items) {
+  for (let i = items.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    const tmp = items[i]
+    items[i] = items[j]
+    items[j] = tmp
+  }
+
+  return items
 }
 
 async function run() {
-  const { nombre, soloSinPrecio } = parseArgs(process.argv)
+  const { nombre, soloSinPrecio, limit, random } = parseArgs(process.argv)
 
   const where = {}
   if (nombre) {
@@ -399,7 +403,7 @@ async function run() {
     where.precioReferencia = null
   }
 
-  const medicamentos = await prisma.medicamento.findMany({
+  const medicamentosBase = await prisma.medicamento.findMany({
     where,
     select: {
       id: true,
@@ -410,9 +414,15 @@ async function run() {
     orderBy: { nombre: 'asc' },
   })
 
+  const medicamentos = random
+    ? shuffleInPlace([...medicamentosBase]).slice(0, limit ?? medicamentosBase.length)
+    : medicamentosBase.slice(0, limit ?? medicamentosBase.length)
+
   const scopeLabel = [
     soloSinPrecio ? 'sin precio' : null,
     nombre ? `nombre contiene "${nombre}"` : null,
+    random ? 'orden aleatorio' : null,
+    limit ? `limit ${limit}` : null,
   ].filter(Boolean).join(' y ') || 'todos'
 
   console.log(`🔍 Actualizando precios para ${medicamentos.length} medicamento(s) (${scopeLabel})...\n`)

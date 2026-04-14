@@ -49,3 +49,37 @@ Callbacks a registrar en cada proveedor:
 
 - `https://tu-dominio.com/api/auth/oauth/google/callback`
 - `https://tu-dominio.com/api/auth/oauth/microsoft/callback`
+
+## Heroku
+
+- `Procfile` usa:
+  - `release: npm run heroku:release`
+  - `web: npm start`
+- El release ahora aplica migraciones versionadas con `prisma migrate deploy`.
+- El seed no corre por defecto en cada deploy. Para habilitarlo:
+  - `HEROKU_RUN_SEED_ON_RELEASE=true`
+
+Variables importantes para pagos de Mercado Pago:
+
+- `MERCADOPAGO_ACCESS_TOKEN`
+- `MERCADOPAGO_CURRENCY_ID` (ej: `CLP`)
+- `MERCADOPAGO_MONTHLY_PRICE`
+- `MERCADOPAGO_ANNUAL_PRICE`
+- `MERCADOPAGO_WEBHOOK_SECRET`
+- `MERCADOPAGO_WEBHOOK_URL` (recomendado para producción)
+- `MERCADOPAGO_WEBHOOK_STRICT_SIGNATURE` (`true` recomendado en producción)
+
+Checklist de producción para pagos:
+
+1. Configura `APP_URL` con HTTPS real (ej: `https://app.tudominio.com`).
+2. Configura `MERCADOPAGO_ACCESS_TOKEN` de producción (no sandbox).
+3. Define precios finales con `MERCADOPAGO_MONTHLY_PRICE` y `MERCADOPAGO_ANNUAL_PRICE`.
+4. Configura webhook:
+   - URL: `https://tu-dominio.com/api/mercadopago/webhook` (o `MERCADOPAGO_WEBHOOK_URL`)
+   - Evento: pagos/suscripciones recurrentes
+   - Secreto: `MERCADOPAGO_WEBHOOK_SECRET`
+5. Mantén `MERCADOPAGO_WEBHOOK_STRICT_SIGNATURE=true`.
+6. Realiza prueba real de extremo a extremo:
+   - Checkout de plan mensual/anual
+   - Redirección a `/pro/success`
+   - Usuario queda con `isPro=true` y `proSubscriptionStatus=authorized|active`

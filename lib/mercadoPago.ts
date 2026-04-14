@@ -37,6 +37,13 @@ export function getMercadoPagoBaseUrls(baseUrl: string) {
   }
 }
 
+export function getMercadoPagoWebhookUrl(baseUrl: string) {
+  const fromEnv = process.env.MERCADOPAGO_WEBHOOK_URL?.trim()
+  if (fromEnv) return fromEnv
+  const normalizedBaseUrl = baseUrl.replace(/\/$/, '')
+  return `${normalizedBaseUrl}/api/mercadopago/webhook`
+}
+
 export async function createMercadoPagoSubscription(params: {
   userId: string
   email: string
@@ -44,24 +51,35 @@ export async function createMercadoPagoSubscription(params: {
   planKey: ProPlanKey
 }) {
   const { preApproval } = createMercadoPagoClients()
+  const normalizedBaseUrl = params.baseUrl.replace(/\/$/, '')
+  if (process.env.NODE_ENV === 'production' && !normalizedBaseUrl.startsWith('https://')) {
+    throw new Error('APP_URL debe usar https:// en producción para Mercado Pago')
+  }
+
   const urls = getMercadoPagoBaseUrls(params.baseUrl)
+  const webhookUrl = getMercadoPagoWebhookUrl(params.baseUrl)
   const plan = PRO_PLANS[params.planKey] ?? PRO_PLANS.monthly
   const price = plan.key === 'annual' ? ANNUAL_PRICE : MONTHLY_PRICE
 
-  const result = await preApproval.create({
-    body: {
-      reason: `FINLAY Pro ${plan.label}`,
-      back_url: `${urls.success}&plan=${plan.key}`,
-      external_reference: params.userId,
-      payer_email: params.email,
-      auto_recurring: {
-        frequency: plan.durationDays === 365 ? 12 : 1,
-        frequency_type: 'months',
-        transaction_amount: price,
-        currency_id: DEFAULT_CURRENCY,
-      },
+  if (!Number.isFinite(price) || price <= 0) {
+    throw new Error(`Precio inválido para plan ${plan.key}. Revisa MERCADOPAGO_MONTHLY_PRICE/MERCADOPAGO_ANNUAL_PRICE`)
+  }
+
+  const body = {
+    reason: `FINLAY Pro ${plan.label}`,
+    back_url: `${urls.success}&plan=${plan.key}`,
+    notification_url: webhookUrl,
+    external_reference: params.userId,
+    payer_email: params.email,
+    auto_recurring: {
+      frequency: plan.durationDays === 365 ? 12 : 1,
+      frequency_type: 'months',
+      transaction_amount: price,
+      currency_id: DEFAULT_CURRENCY,
     },
-  })
+  } as unknown as Parameters<typeof preApproval.create>[0]['body']
+
+  const result = await preApproval.create({ body })
 
   return result
 }

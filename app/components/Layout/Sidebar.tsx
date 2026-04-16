@@ -5,6 +5,7 @@ import {
   ChevronRight, Send, Loader2,
   ExternalLink, Lock, X,
 } from 'lucide-react'
+import { useAuth } from '@/hooks/useAuth'
 
 interface Message {
   role: 'user' | 'assistant'
@@ -44,6 +45,8 @@ function formatEventDate(dateStr: string | null | undefined) {
 }
 
 export default function Sidebar({ isPro }: SidebarProps) {
+  const { user } = useAuth()
+  const effectiveIsPro = user?.isPro ?? isPro
   const [open, setOpen] = useState(false)
   const [tab, setTab] = useState<Tab>('chat')
 
@@ -71,10 +74,10 @@ export default function Sidebar({ isPro }: SidebarProps) {
   }, [messages])
 
   useEffect(() => {
-    if (open && tab === 'events' && isPro && !eventsLoaded) {
+    if (open && tab === 'events' && effectiveIsPro && !eventsLoaded) {
       loadEvents()
     }
-  }, [open, tab, isPro, eventsLoaded])
+  }, [open, tab, effectiveIsPro, eventsLoaded])
 
   async function loadEvents() {
     setEventsLoading(true)
@@ -185,7 +188,7 @@ export default function Sidebar({ isPro }: SidebarProps) {
           aria-label="Papers académicos"
         >
           <BookOpen size={16} />
-          {!isPro && <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-amber-400" />}
+          {!effectiveIsPro && <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-amber-400" />}
         </button>
 
         <button
@@ -194,7 +197,7 @@ export default function Sidebar({ isPro }: SidebarProps) {
           aria-label="Calendario de eventos"
         >
           <CalendarDays size={16} />
-          {!isPro && <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-amber-400" />}
+          {!effectiveIsPro && <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-amber-400" />}
         </button>
       </aside>
 
@@ -231,7 +234,7 @@ export default function Sidebar({ isPro }: SidebarProps) {
             >
               {t.icon}
               <span>{t.label}</span>
-              {t.proOnly && !isPro && (
+              {t.proOnly && !effectiveIsPro && (
                 <span className="absolute top-1.5 right-3">
                   <Lock size={8} className="text-amber-500" />
                 </span>
@@ -254,8 +257,8 @@ export default function Sidebar({ isPro }: SidebarProps) {
                     </div>
                     <p className="text-sm font-semibold text-slate-700">Consulta sobre fármacos</p>
                     <p className="text-xs text-slate-400 mt-1">
-                      {isPro
-                        ? 'Acceso completo al catálogo (500+ medicamentos)'
+                      {effectiveIsPro
+                        ? 'Acceso completo al catálogo (10k+ medicamentos)'
                         : 'Catálogo básico de 10 medicamentos. Actualiza a Pro para acceso completo.'}
                     </p>
                     <div className="mt-4 grid gap-1.5">
@@ -325,7 +328,7 @@ export default function Sidebar({ isPro }: SidebarProps) {
           {/* ── PAPERS TAB ── */}
           {tab === 'papers' && (
             <>
-              {!isPro ? (
+              {!effectiveIsPro ? (
                 <div className="flex-1 flex flex-col items-center justify-center px-6 text-center">
                   <div className="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center mx-auto mb-3">
                     <BookOpen size={20} className="text-amber-600" />
@@ -416,7 +419,7 @@ export default function Sidebar({ isPro }: SidebarProps) {
           {/* ── EVENTS TAB ── */}
           {tab === 'events' && (
             <>
-              {!isPro ? (
+              {!effectiveIsPro ? (
                 <div className="flex-1 flex flex-col items-center justify-center px-6 text-center">
                   <div className="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center mx-auto mb-3">
                     <CalendarDays size={20} className="text-amber-600" />

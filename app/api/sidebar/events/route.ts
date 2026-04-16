@@ -1,10 +1,12 @@
 import { NextResponse } from 'next/server'
 import { getSession } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { loadSyncedProUser } from '@/lib/proSubscription'
 
 export async function GET() {
   const session = await getSession()
-  if (!session?.isPro) {
+  const usuario = session ? await loadSyncedProUser(session.userId) : null
+  if (!usuario?.isPro) {
     return NextResponse.json({ error: 'Se requiere plan Pro' }, { status: 403 })
   }
 

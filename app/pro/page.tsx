@@ -16,7 +16,7 @@ const FREE_FEATURES = [
 ]
 
 const PRO_FEATURES = [
-  { icon: Zap,           iconColor: 'text-blue-600',   bg: 'bg-blue-50',   label: '500+ fármacos' },
+  { icon: Zap,           iconColor: 'text-blue-600',   bg: 'bg-blue-50',   label: '10k+ fármacos' },
   { icon: Scale,         iconColor: 'text-indigo-600', bg: 'bg-indigo-50', label: 'Comparador hasta 5 fármacos' },
   { icon: AlertTriangle, iconColor: 'text-amber-600',  bg: 'bg-amber-50',  label: 'Efectos adversos completos' },
   { icon: Ban,           iconColor: 'text-red-600',    bg: 'bg-red-50',    label: 'Contraindicaciones detalladas' },
@@ -273,7 +273,7 @@ export default function ProPage() {
           <div className="p-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">Pro</div>
         </div>
         {[
-          ['Fármacos', '10', '500+'],
+          ['Fármacos', '10', '10k+'],
           ['Comparador', '2 fármacos', '5 fármacos'],
           ['Efectos adversos', null, true],
           ['Contraindicaciones', null, true],

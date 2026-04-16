@@ -14,7 +14,7 @@ const sections = [
   },
   {
     title: 'Qué incluye la versión Pro',
-    body: 'Catálogo completo con efectos adversos y contraindicaciones, acceso al asistente IA con 500+ medicamentos, búsqueda de papers en PubMed con abstract, y calendario de congresos y conferencias farmacológicas.',
+    body: 'Catálogo completo con efectos adversos y contraindicaciones, acceso al asistente IA sobre 10k+ medicamentos, búsqueda de papers en PubMed con abstract, y calendario de congresos y conferencias farmacológicas.',
     icon: ShieldCheck,
   },
 ]

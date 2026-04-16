@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSession } from '@/lib/auth'
+import { loadSyncedProUser } from '@/lib/proSubscription'
 
 interface PubMedArticle {
   pmid: string
@@ -71,7 +72,8 @@ async function searchPubMed(query: string, maxResults = 5): Promise<PubMedArticl
 
 export async function POST(req: NextRequest) {
   const session = await getSession()
-  if (!session?.isPro) {
+  const usuario = session ? await loadSyncedProUser(session.userId) : null
+  if (!usuario?.isPro) {
     return NextResponse.json({ error: 'Se requiere plan Pro' }, { status: 403 })
   }
 

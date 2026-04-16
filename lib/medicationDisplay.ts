@@ -2,13 +2,19 @@ export function formatMedicationDisplayName(name: string) {
   const value = (name ?? '').trim()
   if (!value) return value
 
-  const lettersOnly = value.replace(/[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ]/g, '')
-  if (!lettersOnly) return value
-
-  const isAllCaps = lettersOnly === lettersOnly.toUpperCase()
-  if (!isAllCaps) return value
-
   return value
-    .toLowerCase()
-    .replace(/\b([a-záéíóúüñ])/g, char => char.toUpperCase())
+    .split(/\s+/)
+    .map(token => {
+      const lettersOnly = token.replace(/[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ]/g, '')
+      if (!lettersOnly) return token
+
+      // Preserve short acronyms (e.g. XR, SR, IV) for readability.
+      if (lettersOnly.length <= 3 && lettersOnly === lettersOnly.toUpperCase()) {
+        return token.toUpperCase()
+      }
+
+      const lower = token.toLowerCase()
+      return lower.charAt(0).toUpperCase() + lower.slice(1)
+    })
+    .join(' ')
 }

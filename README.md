@@ -83,3 +83,46 @@ Checklist de producción para pagos:
    - Checkout de plan mensual/anual
    - Redirección a `/pro/success`
    - Usuario queda con `isPro=true` y `proSubscriptionStatus=authorized|active`
+
+## Railway
+
+- Comando recomendado de inicio en Railway:
+  - `npm run railway:start`
+- `railway:start`:
+  - Ejecuta `prisma migrate deploy`
+  - Intenta recovery del baseline legacy si hiciera falta
+  - Opcionalmente ejecuta seed con `RAILWAY_RUN_SEED_ON_DEPLOY=true`
+  - Inicia Next en `0.0.0.0:${PORT}`
+
+Variables mínimas para producción en Railway:
+
+- `DATABASE_URL`
+- `JWT_SECRET`
+- `APP_URL`
+- `NEXT_PUBLIC_APP_URL`
+- `NEXT_PUBLIC_BASE_URL`
+- `OPENAI_API_KEY`
+- `MERCADOPAGO_ACCESS_TOKEN`
+- `MERCADOPAGO_CURRENCY_ID`
+- `MERCADOPAGO_MONTHLY_PRICE`
+- `MERCADOPAGO_ANNUAL_PRICE`
+- `MERCADOPAGO_WEBHOOK_SECRET`
+- `MERCADOPAGO_WEBHOOK_URL`
+- `MERCADOPAGO_WEBHOOK_STRICT_SIGNATURE=true`
+
+Checklist de migración Heroku -> Railway:
+
+1. Crear proyecto en Railway y conectar repo (branch `main`).
+2. Configurar variables de entorno de producción (las mismas que en Heroku, actualizando dominio).
+3. Definir Start Command: `npm run railway:start`.
+4. Verificar build/deploy y migraciones Prisma en logs.
+5. Configurar/actualizar webhook de Mercado Pago al dominio Railway:
+   - `https://TU_DOMINIO_RAILWAY/api/mercadopago/webhook`
+6. Probar flujo E2E:
+   - Login
+   - Checkout Mercado Pago (mensual/anual)
+   - Retorno a `/pro/success`
+   - Usuario actualizado a Pro
+7. Cambiar DNS del dominio final a Railway.
+8. Confirmar tráfico y webhooks en Railway.
+9. Desactivar app en Heroku una vez estable.

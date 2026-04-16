@@ -6,7 +6,7 @@ import Link from 'next/link'
 import SearchBar from './components/SearchBar'
 import DrugCard from './components/DrugCard'
 import { DrugCardSkeleton } from './components/LoadingSkeleton'
-import { Scale, Zap, ArrowRight } from 'lucide-react'
+import { Scale, Zap, ArrowRight, Bot, BookOpen, CalendarDays, FlaskConical } from 'lucide-react'
 import { fetchJsonWithTimeout } from '@/lib/fetchJson'
 import { useAuth } from '@/hooks/useAuth'
 
@@ -37,9 +37,101 @@ interface ApiResponse {
   limit: number
 }
 
+function LandingPage() {
+  const features = [
+    {
+      icon: <Bot size={20} className="text-white" />,
+      bg: 'bg-slate-900',
+      title: 'Asistente IA',
+      desc: 'Consulta dosis, interacciones y contraindicaciones en lenguaje natural. Respuestas clínicas en segundos.',
+    },
+    {
+      icon: <Scale size={20} className="text-white" />,
+      bg: 'bg-blue-600',
+      title: 'Comparador clínico',
+      desc: 'Compara hasta 5 fármacos lado a lado. Análisis automatizado con IA para apoyar tu decisión terapéutica.',
+    },
+    {
+      icon: <BookOpen size={20} className="text-white" />,
+      bg: 'bg-indigo-600',
+      title: 'Papers académicos',
+      desc: 'Busca en PubMed y accede a abstracts científicos sin salir de la plataforma.',
+    },
+    {
+      icon: <CalendarDays size={20} className="text-white" />,
+      bg: 'bg-violet-600',
+      title: 'Eventos farmacológicos',
+      desc: 'Calendario actualizado automáticamente con congresos, conferencias y webinars del área.',
+    },
+  ]
+
+  return (
+    <div className="pb-28 space-y-16">
+
+      {/* ── Hero ── */}
+      <section className="relative overflow-hidden rounded-3xl bg-slate-900 px-6 py-14 sm:py-20 text-center shadow-2xl">
+        {/* Dot grid pattern */}
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.07]"
+          style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '24px 24px' }}
+        />
+        {/* Glow */}
+        <div className="pointer-events-none absolute -top-20 left-1/2 -translate-x-1/2 w-96 h-96 rounded-full bg-blue-500/20 blur-3xl" />
+
+        <div className="relative">
+          <div className="inline-flex items-center gap-2 rounded-full bg-white/10 border border-white/20 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-blue-200 mb-6">
+            <FlaskConical size={12} />
+            Plataforma clínica · Chile
+          </div>
+
+          <h1 className="text-3xl sm:text-5xl font-bold text-white tracking-tight leading-tight max-w-2xl mx-auto">
+            La primera plataforma que compara tus fármacos con inteligencia clínica
+          </h1>
+
+          <p className="mt-5 text-sm sm:text-base text-slate-300 max-w-xl mx-auto leading-relaxed">
+            Catálogo de medicamentos chilenos, asistente IA, búsqueda de papers y eventos farmacológicos. Todo en un solo lugar, pensado para profesionales de salud.
+          </p>
+
+          <p className="mt-6 text-[11px] text-slate-400">
+            Prueba de 5 días incluida · Sin compromiso · Cancela cuando quieras
+          </p>
+        </div>
+      </section>
+
+      {/* ── Features ── */}
+      <section>
+        <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 text-center mb-6">
+          Todo lo que necesitas en una sola plataforma
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {features.map(f => (
+            <div
+              key={f.title}
+              className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm hover:shadow-md hover:border-slate-300 transition-all"
+            >
+              <div className={`w-10 h-10 rounded-xl ${f.bg} flex items-center justify-center mb-4`}>
+                {f.icon}
+              </div>
+              <h3 className="font-bold text-slate-900 text-[15px] mb-1">{f.title}</h3>
+              <p className="text-sm text-slate-500 leading-relaxed">{f.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── CTA banner ── */}
+      <section className="rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-50 to-indigo-50 p-6 text-center">
+        <p className="font-bold text-slate-900">¿Eres profesional de salud?</p>
+        <p className="text-sm text-slate-500 mt-1">Regístrate arriba y empieza con 5 días de prueba gratuita.</p>
+      </section>
+
+    </div>
+  )
+}
+
 export default function Home() {
   const router = useRouter()
-  const { user } = useAuth()
+  const { user, isLoading: authLoading } = useAuth()
   const [query, setQuery] = useState('')
   const [categoriaActiva, setCategoriaActiva] = useState('')
   const [seleccionados, setSeleccionados] = useState<string[]>([])
@@ -107,6 +199,16 @@ export default function Home() {
   }
 
   const hayMas = total > limit
+
+  // Show landing page for unauthenticated users
+  if (!authLoading && !user) {
+    return <LandingPage />
+  }
+
+  // While checking auth, show nothing to avoid flash
+  if (authLoading) {
+    return <div className="min-h-[60vh]" />
+  }
 
   return (
     <div className="space-y-6 pb-28">
@@ -231,9 +333,84 @@ export default function Home() {
 
       {/* Error */}
       {error && !isLoading && (
-        <div className="text-center py-12">
-          <p className="text-slate-400 text-sm">Error al cargar los fármacos</p>
-        </div>
+        <section className="relative overflow-hidden rounded-3xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-blue-50/60 p-6 shadow-sm sm:p-8">
+          <div className="pointer-events-none absolute -right-16 -top-16 h-44 w-44 rounded-full bg-blue-200/25 blur-3xl" />
+          <div className="pointer-events-none absolute -left-20 -bottom-20 h-52 w-52 rounded-full bg-slate-300/20 blur-3xl" />
+          {!user ? (
+            <div className="relative grid gap-6 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
+              <div className="text-center lg:text-left">
+                <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400">Bienvenido a FINLAY</p>
+                <h2 className="mt-2 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+                  Tu asistente clínico para decidir mejor, más rápido.
+                </h2>
+                <p className="mt-3 text-sm leading-6 text-slate-600">
+                  Regístrate para activar tu prueba de 5 días con tarjeta en Mercado Pago y acceder al catálogo completo, comparador y análisis clínico.
+                </p>
+                <div className="mt-6 flex flex-wrap items-center justify-center gap-2 lg:justify-start">
+                  <Link
+                    href="/register"
+                    className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-slate-800 transition-colors"
+                  >
+                    Crear cuenta <ArrowRight size={14} />
+                  </Link>
+                  <Link
+                    href="/login"
+                    className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
+                  >
+                    Iniciar sesión
+                  </Link>
+                </div>
+              </div>
+              <div className="rounded-2xl border border-white/70 bg-white/80 p-4 backdrop-blur">
+                <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400">Qué incluye</p>
+                <div className="mt-3 space-y-2 text-sm text-slate-700">
+                  <p className="flex items-center gap-2">
+                    <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />
+                    10k+ fármacos y fichas clínicas
+                  </p>
+                  <p className="flex items-center gap-2">
+                    <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />
+                    Comparador clínico de hasta 5 medicamentos
+                  </p>
+                  <p className="flex items-center gap-2">
+                    <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />
+                    Análisis con IA y exportación para consulta
+                  </p>
+                </div>
+                <Link
+                  href="/acerca-de"
+                  className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold text-blue-700 hover:text-blue-800"
+                >
+                  Conocer FINLAY <ArrowRight size={12} />
+                </Link>
+              </div>
+            </div>
+          ) : !isPro ? (
+            <div className="relative text-center">
+              <div className="mx-auto mb-3 inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-amber-700">
+                <Zap size={11} fill="currentColor" />
+                Acceso Pro requerido
+              </div>
+              <h2 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">Activa tu prueba de 5 días</h2>
+              <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-slate-600">
+                Para ver medicamentos necesitas una suscripción activa. Puedes comenzar hoy con tarjeta y cancelar cuando quieras desde Mercado Pago.
+              </p>
+              <div className="mt-6">
+                <Link
+                  href="/pro"
+                  className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-800 transition-colors"
+                >
+                  <Zap size={14} fill="currentColor" />
+                  Ver planes y activar prueba
+                </Link>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-2">
+              <p className="text-slate-400 text-sm">No pudimos cargar los fármacos en este momento. Intenta nuevamente en unos segundos.</p>
+            </div>
+          )}
+        </section>
       )}
 
       {/* Sin resultados */}

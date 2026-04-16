@@ -74,7 +74,7 @@ export default function Sidebar({ isPro }: SidebarProps) {
     if (open && tab === 'events' && isPro && !eventsLoaded) {
       loadEvents()
     }
-  }, [open, tab, isPro])
+  }, [open, tab, isPro, eventsLoaded])
 
   async function loadEvents() {
     setEventsLoading(true)
@@ -141,6 +141,26 @@ export default function Sidebar({ isPro }: SidebarProps) {
 
   return (
     <>
+      {/* Mobile floating trigger */}
+      {!open && (
+        <button
+          onClick={() => setOpen(true)}
+          className="md:hidden fixed bottom-20 right-4 z-40 w-12 h-12 rounded-2xl bg-slate-900 text-white shadow-lg flex items-center justify-center"
+          aria-label="Abrir barra inteligente"
+        >
+          <Bot size={20} />
+        </button>
+      )}
+
+      {/* Mobile backdrop */}
+      {open && (
+        <button
+          onClick={() => setOpen(false)}
+          className="md:hidden fixed inset-0 bg-slate-900/30 z-40"
+          aria-label="Cerrar barra inteligente"
+        />
+      )}
+
       {/* Collapsed sidebar — narrow strip */}
       <aside
         className={`hidden md:flex fixed left-0 top-16 bottom-0 z-30 flex-col items-center pt-4 gap-3 bg-white border-r border-slate-200 transition-all duration-300 ${
@@ -180,8 +200,10 @@ export default function Sidebar({ isPro }: SidebarProps) {
 
       {/* Expanded sidebar panel */}
       <aside
-        className={`hidden md:flex fixed left-0 top-16 bottom-0 z-30 flex-col bg-white border-r border-slate-200 shadow-xl transition-all duration-300 ${
-          open ? 'w-80 opacity-100' : 'w-0 opacity-0 overflow-hidden pointer-events-none'
+        className={`fixed left-0 right-0 top-12 bottom-16 md:top-16 md:bottom-0 md:right-auto z-50 flex flex-col bg-white border-t md:border-t-0 md:border-r border-slate-200 shadow-xl transition-all duration-300 ${
+          open
+            ? 'opacity-100 translate-y-0 md:w-80'
+            : 'opacity-0 translate-y-full pointer-events-none md:translate-y-0 md:w-0 md:overflow-hidden'
         }`}
       >
         {/* Header */}
@@ -473,7 +495,7 @@ export default function Sidebar({ isPro }: SidebarProps) {
         {/* Open sidebar arrow for collapsed state */}
         <button
           onClick={() => setOpen(false)}
-          className="absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-white border border-slate-200 shadow-sm flex items-center justify-center text-slate-400 hover:text-slate-600 transition-colors"
+          className="hidden md:flex absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-white border border-slate-200 shadow-sm items-center justify-center text-slate-400 hover:text-slate-600 transition-colors"
           aria-label="Cerrar barra lateral"
         >
           <ChevronRight size={12} className="rotate-180" />

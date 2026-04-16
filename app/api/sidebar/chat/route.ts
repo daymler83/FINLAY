@@ -3,10 +3,17 @@ import OpenAI from 'openai'
 import { getSession } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+function getOpenAIClient() {
+  const apiKey = process.env.OPENAI_API_KEY
+  if (!apiKey) {
+    throw new Error('OPENAI_API_KEY no está configurada')
+  }
+  return new OpenAI({ apiKey })
+}
 
 export async function POST(req: NextRequest) {
   try {
+    const openai = getOpenAIClient()
     const session = await getSession()
     const isPro = session?.isPro ?? false
 

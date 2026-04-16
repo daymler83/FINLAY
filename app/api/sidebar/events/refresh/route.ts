@@ -2,7 +2,13 @@ import { NextResponse } from 'next/server'
 import OpenAI from 'openai'
 import { prisma } from '@/lib/prisma'
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+function getOpenAIClient() {
+  const apiKey = process.env.OPENAI_API_KEY
+  if (!apiKey) {
+    throw new Error('OPENAI_API_KEY no está configurada')
+  }
+  return new OpenAI({ apiKey })
+}
 
 // Cron secret to protect this endpoint
 const CRON_SECRET = process.env.CRON_SECRET
@@ -14,6 +20,7 @@ export async function POST(req: Request) {
   }
 
   try {
+    const openai = getOpenAIClient()
     const today = new Date()
     const monthNames = [
       'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',

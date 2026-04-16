@@ -17,7 +17,13 @@ type PatientProfile = {
   clinicalContext?: string
 }
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+function getOpenAIClient() {
+  const apiKey = process.env.OPENAI_API_KEY
+  if (!apiKey) {
+    throw new Error('OPENAI_API_KEY no está configurada')
+  }
+  return new OpenAI({ apiKey })
+}
 
 function parseJson(raw: string) {
   const clean = raw
@@ -58,6 +64,7 @@ function buildRequestHash(medicationIds: string[], patientProfile: PatientProfil
 
 export async function POST(request: NextRequest) {
   try {
+    const openai = getOpenAIClient()
     const session = await getSession()
     if (!session) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 })

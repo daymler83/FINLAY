@@ -55,3 +55,7 @@ next-env.d.ts
 # Archivos temporales
 *.tmp
 *.temp
+
+# Dataset grande local (no versionar)
+pipeline/data/vademecum-chile.json
+pipeline/data/vademecum-chile-ai-reclassify.json

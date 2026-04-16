@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { resolveClinicalCategory } from '@/lib/clinicalCategory'
+import { formatMedicationDisplayName } from '@/lib/medicationDisplay'
 
 export async function GET(
   request: NextRequest,
@@ -23,6 +24,7 @@ export async function GET(
     
     return NextResponse.json({
       ...medicamento,
+      nombre: formatMedicationDisplayName(medicamento.nombre),
       categoriaClinica: resolveClinicalCategory(medicamento.familia, medicamento.principioActivo),
     })
   } catch (error) {

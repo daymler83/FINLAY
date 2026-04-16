@@ -106,3 +106,20 @@ model ComparisonInsightCache {
 
   @@index([createdAt])
 }
+
+model SidebarChatCache {
+  id               String   @id @default(cuid())
+  requestHash      String   @unique
+  message          String
+  normalizedMessage String
+  response         String
+  medicationIds    Json
+  isPro            Boolean  @default(false)
+  sourceModel      String
+  createdByUserId  String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([createdAt])
+  @@index([normalizedMessage])
+}

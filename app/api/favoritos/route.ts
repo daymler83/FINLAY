@@ -3,6 +3,7 @@ import { Prisma } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
 import { getSession } from '@/lib/auth'
 import { resolveClinicalCategory } from '@/lib/clinicalCategory'
+import { formatMedicationDisplayName } from '@/lib/medicationDisplay'
 
 export async function GET() {
   const session = await getSession()
@@ -25,6 +26,7 @@ export async function GET() {
   return NextResponse.json(
     favoritos.map(f => ({
       ...f.medicamento,
+      nombre: formatMedicationDisplayName(f.medicamento.nombre),
       categoriaClinica: resolveClinicalCategory(f.medicamento.familia, f.medicamento.principioActivo),
     }))
   )

@@ -1,8 +1,10 @@
+import crypto from 'node:crypto'
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
 import { getSession } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { loadSyncedProUser } from '@/lib/proSubscription'
+import { formatMedicationDisplayName } from '@/lib/medicationDisplay'
 
 function getOpenAIClient() {
   const apiKey = process.env.OPENAI_API_KEY
@@ -33,6 +35,33 @@ function extractSearchTerms(message: string) {
   return [...new Set(terms)]
     .sort((a, b) => b.length - a.length)
     .slice(0, 4)
+}
+
+function normalizeMessageForCache(value: string) {
+  return value
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+function buildChatRequestHash(input: {
+  message: string
+  isPro: boolean
+  medicationIds: string[]
+  history: Array<{ role: string; content: string }>
+}) {
+  const normalized = {
+    message: normalizeMessageForCache(input.message),
+    isPro: input.isPro,
+    medicationIds: [...input.medicationIds].sort(),
+    history: input.history.slice(-4).map(item => ({
+      role: item.role,
+      content: normalizeMessageForCache(item.content),
+    })),
+  }
+  return crypto.createHash('sha256').update(JSON.stringify(normalized)).digest('hex')
 }
 
 export async function POST(req: NextRequest) {
@@ -130,9 +159,27 @@ export async function POST(req: NextRequest) {
       })
     }
 
+    const requestHash = buildChatRequestHash({
+      message,
+      isPro,
+      medicationIds: medicamentos.map(m => m.id),
+      history,
+    })
+
+    const cachedRows = await prisma.$queryRaw<Array<{ response: string }>>`
+      SELECT response
+      FROM "SidebarChatCache"
+      WHERE "requestHash" = ${requestHash}
+      LIMIT 1
+    `
+    const cached = cachedRows[0]?.response
+    if (cached) {
+      return NextResponse.json({ reply: cached, cached: true })
+    }
+
     const catalogSummary = medicamentos.map(m => {
       const lines = [
-        `• ${m.nombre} (${m.principioActivo})`,
+        `• ${formatMedicationDisplayName(m.nombre)} (${m.principioActivo})`,
         `  Familia: ${m.familia}`,
         `  Presentación: ${m.presentacion}`,
         m.vidaMedia ? `  Vida media: ${m.vidaMedia}` : null,
@@ -166,7 +213,24 @@ export async function POST(req: NextRequest) {
 
     const reply = completion.choices[0]?.message?.content ?? 'Sin respuesta.'
 
-    return NextResponse.json({ reply })
+    const cacheId = crypto.randomUUID()
+    const normalizedMessage = normalizeMessageForCache(message)
+    const medicationIdsJson = JSON.stringify([...new Set(medicamentos.map(m => m.id))].sort())
+
+    await prisma.$executeRaw`
+      INSERT INTO "SidebarChatCache"
+        ("id", "requestHash", "message", "normalizedMessage", "response", "medicationIds", "isPro", "sourceModel", "createdByUserId", "updatedAt")
+      VALUES
+        (${cacheId}, ${requestHash}, ${message}, ${normalizedMessage}, ${reply}, ${medicationIdsJson}::jsonb, ${isPro}, 'gpt-4o-mini', ${session?.userId ?? null}, NOW())
+      ON CONFLICT ("requestHash")
+      DO UPDATE SET
+        "response" = EXCLUDED."response",
+        "updatedAt" = NOW(),
+        "sourceModel" = EXCLUDED."sourceModel",
+        "createdByUserId" = EXCLUDED."createdByUserId"
+    `
+
+    return NextResponse.json({ reply, cached: false })
   } catch (err) {
     console.error('[sidebar/chat]', err)
     return NextResponse.json({ error: 'Error al procesar la consulta' }, { status: 500 })

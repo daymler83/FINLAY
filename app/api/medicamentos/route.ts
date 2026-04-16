@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { getSession } from '@/lib/auth'
 import { ClinicalCategory, getAllClinicalCategoryMatchers, getClinicalCategoryMatchers, isClinicalCategory, resolveClinicalCategory } from '@/lib/clinicalCategory'
 import { loadSyncedProUser } from '@/lib/proSubscription'
+import { formatMedicationDisplayName } from '@/lib/medicationDisplay'
 
 const FREE_LIMIT = 10
 const PRO_LIMIT  = 500
@@ -95,6 +96,7 @@ export async function GET(request: NextRequest) {
 
     const medicamentos = medicamentosBase.map((med): MedicamentoConCategoria => ({
       ...med,
+      nombre: formatMedicationDisplayName(med.nombre),
       categoriaClinica: resolveClinicalCategory(med.familia, med.principioActivo),
     }))
 

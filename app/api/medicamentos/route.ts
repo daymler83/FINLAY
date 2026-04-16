@@ -6,7 +6,6 @@ import { ClinicalCategory, getAllClinicalCategoryMatchers, getClinicalCategoryMa
 import { loadSyncedProUser } from '@/lib/proSubscription'
 import { formatMedicationDisplayName } from '@/lib/medicationDisplay'
 
-const FREE_LIMIT = 10
 const PRO_LIMIT  = 500
 export const dynamic = 'force-dynamic'
 
@@ -37,9 +36,17 @@ export async function GET(request: NextRequest) {
   }
 
   const session = await getSession()
-  const usuario = session ? await loadSyncedProUser(session.userId) : null
+  if (!session) {
+    return NextResponse.json({ error: 'Debes iniciar sesión para continuar' }, { status: 401 })
+  }
+
+  const usuario = await loadSyncedProUser(session.userId)
   const isPro = Boolean(usuario?.isPro)
-  const limit  = isPro ? PRO_LIMIT : FREE_LIMIT
+  if (!isPro) {
+    return NextResponse.json({ error: 'Se requiere plan Pro activo. Los nuevos usuarios tienen 5 días gratis.' }, { status: 403 })
+  }
+
+  const limit = PRO_LIMIT
 
   const where: Prisma.MedicamentoWhereInput = {
     precioReferencia: { gt: 0 },

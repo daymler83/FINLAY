@@ -44,13 +44,18 @@ export function hasActiveProAccess(user: UserProState | null | undefined, now = 
   if (!user?.isPro) return false
 
   const status = String(user.proSubscriptionStatus ?? '').trim().toLowerCase()
-  if (status && ACTIVE_SUBSCRIPTION_STATUSES.has(status)) return true
+  const expiresAt = user.proExpiresAt ? new Date(user.proExpiresAt) : null
+  const hasFutureExpiry = Boolean(expiresAt && Number.isFinite(expiresAt.getTime()) && expiresAt.getTime() > now.getTime())
+
+  if (status && ACTIVE_SUBSCRIPTION_STATUSES.has(status)) {
+    // If Mercado Pago returns active/authorized without next date, we still treat it as active.
+    return hasFutureExpiry || !user.proExpiresAt
+  }
+
   if (status && INACTIVE_SUBSCRIPTION_STATUSES.has(status)) return false
 
-  if (!user.proExpiresAt) return true
-
-  const expiresAt = new Date(user.proExpiresAt)
-  return Number.isFinite(expiresAt.getTime()) && expiresAt.getTime() > now.getTime()
+  // No more permanent free/pro by flag only: without subscription status we require expiry.
+  return hasFutureExpiry
 }
 
 export function resolveProPlanKey(value: unknown): ProPlanKey | null {

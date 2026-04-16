@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getSession } from '@/lib/auth'
 import { getAppBaseUrl } from '@/lib/appUrl'
 import { createMercadoPagoSubscription } from '@/lib/mercadoPago'
+import { prisma } from '@/lib/prisma'
 import { PRO_PLANS, resolveProPlanKey } from '@/lib/proAccess'
 import { storePendingProSubscription } from '@/lib/proSubscription'
 
@@ -21,11 +22,27 @@ export async function POST(request: NextRequest) {
   }
 
   try {
+    const currentUser = await prisma.usuario.findUnique({
+      where: { id: session.userId },
+      select: {
+        proPlan: true,
+        proSubscriptionId: true,
+        proSubscriptionStatus: true,
+        proExpiresAt: true,
+      },
+    })
+
+    const includeFreeTrial = !currentUser?.proPlan &&
+      !currentUser?.proSubscriptionId &&
+      !currentUser?.proSubscriptionStatus &&
+      !currentUser?.proExpiresAt
+
     const subscription = await createMercadoPagoSubscription({
       userId: session.userId,
       email: session.email,
       baseUrl,
       planKey,
+      includeFreeTrial,
     })
 
     if (!subscription.init_point || !subscription.id) {

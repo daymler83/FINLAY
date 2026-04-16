@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { getSession } from '@/lib/auth'
+import { loadSyncedProUser } from '@/lib/proSubscription'
 import { resolveClinicalCategory } from '@/lib/clinicalCategory'
 import { formatMedicationDisplayName } from '@/lib/medicationDisplay'
 
@@ -7,6 +9,16 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const session = await getSession()
+  if (!session) {
+    return NextResponse.json({ error: 'Debes iniciar sesión para continuar' }, { status: 401 })
+  }
+
+  const usuario = await loadSyncedProUser(session.userId)
+  if (!usuario?.isPro) {
+    return NextResponse.json({ error: 'Se requiere plan Pro activo. Los nuevos usuarios tienen 5 días gratis.' }, { status: 403 })
+  }
+
   const { id } = await params
   
   if (!id) {

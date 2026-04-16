@@ -4,15 +4,16 @@ import Link from 'next/link'
 import {
   CheckCircle, Lock, Zap, AlertTriangle, Ban,
   Star, Scale, Clock, Activity, FileText, Brain,
-  Check, Minus, ArrowRight,
+  Check, ArrowRight,
 } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { PRO_PLAN_LIST, type ProPlanKey } from '@/lib/proAccess'
 
-const FREE_FEATURES = [
-  '10 medicamentos visibles',
-  'Comparador hasta 2 fármacos',
-  'Búsqueda por nombre, principio activo y laboratorio',
+const TRIAL_FEATURES = [
+  'Acceso completo por 5 días para cuentas nuevas',
+  'Requiere registrar tarjeta en Mercado Pago',
+  'Comparador y análisis clínico con IA',
+  'Si no cancelas, se cobra y continúa automáticamente',
 ]
 
 const PRO_FEATURES = [
@@ -87,9 +88,11 @@ export default function ProPage() {
           </div>
           <h1 className="text-3xl font-bold text-slate-900 mb-2 tracking-tight">Tu acceso Pro está activo</h1>
           <p className="text-slate-500 text-sm">
-            {user.proExpiresAt
-              ? `Tu plan ${user.proPlan === 'annual' ? 'anual' : 'mensual'} se renueva automáticamente el ${formatDate(user.proExpiresAt)}.`
-              : 'Tu suscripción está activa y se renueva automáticamente hasta que la canceles.'}
+            {['authorized', 'pending'].includes(String(user.proSubscriptionStatus ?? '').toLowerCase()) && user.proExpiresAt
+              ? `Tu prueba gratis vence el ${formatDate(user.proExpiresAt)}. Si no cancelas, se cobrará automáticamente para continuar.`
+              : user.proExpiresAt
+                ? `Tu plan ${user.proPlan === 'annual' ? 'anual' : 'mensual'} se renueva automáticamente el ${formatDate(user.proExpiresAt)}.`
+                : 'Tu suscripción está activa y se renueva automáticamente hasta que la canceles.'}
           </p>
         </div>
 
@@ -134,7 +137,7 @@ export default function ProPage() {
         </div>
         <h1 className="text-3xl font-bold text-slate-900 mb-2 tracking-tight">Planes para usar FINLAY</h1>
         <p className="text-slate-500 text-sm">
-          Empieza gratis, o elige mensual o anual si quieres acceso completo por tiempo determinado.
+          No hay plan gratuito permanente. La prueba de 5 días requiere tarjeta y luego continúa con cobro automático si no cancelas.
         </p>
       </div>
 
@@ -148,8 +151,8 @@ export default function ProPage() {
         <article className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 flex flex-col">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-xs font-bold uppercase tracking-widest text-slate-400">Freemium</p>
-              <h2 className="mt-1 text-xl font-bold text-slate-900">Gratis</h2>
+              <p className="text-xs font-bold uppercase tracking-widest text-slate-400">Prueba</p>
+              <h2 className="mt-1 text-xl font-bold text-slate-900">5 días gratis</h2>
             </div>
             <div className="w-11 h-11 rounded-2xl bg-slate-100 flex items-center justify-center">
               <Lock size={16} className="text-slate-500" />
@@ -158,11 +161,11 @@ export default function ProPage() {
 
           <div className="mt-4">
             <p className="text-4xl font-black tracking-tight text-slate-900">$0</p>
-            <p className="text-sm text-slate-500 mt-1">Acceso básico permanente</p>
+            <p className="text-sm text-slate-500 mt-1">Solo para usuarios nuevos</p>
           </div>
 
           <ul className="mt-5 space-y-2.5">
-            {FREE_FEATURES.map(item => (
+            {TRIAL_FEATURES.map(item => (
               <li key={item} className="flex items-start gap-2 text-sm text-slate-600">
                 <Check size={14} className="text-emerald-500 mt-0.5 shrink-0" />
                 <span>{item}</span>
@@ -172,10 +175,10 @@ export default function ProPage() {
 
           <div className="mt-6">
             <Link
-              href="/"
+              href="/register"
               className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
             >
-              Seguir gratis
+              Crear cuenta con prueba
             </Link>
           </div>
         </article>
@@ -269,24 +272,24 @@ export default function ProPage() {
       <div className="bg-slate-50 border border-slate-200 rounded-3xl p-5">
         <div className="grid grid-cols-3 border-b border-slate-200">
           <div className="p-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Función</div>
-          <div className="p-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">Freemium</div>
+          <div className="p-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">Prueba 5 días</div>
           <div className="p-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">Pro</div>
         </div>
         {[
-          ['Fármacos', '10', '10k+'],
-          ['Comparador', '2 fármacos', '5 fármacos'],
-          ['Efectos adversos', null, true],
-          ['Contraindicaciones', null, true],
-          ['Favoritos', null, true],
-          ['Historial', null, true],
-          ['Nota clínica', null, true],
-          ['Análisis clínico IA', null, true],
+          ['Fármacos', '10k+', '10k+'],
+          ['Comparador', 'hasta 5 fármacos', 'hasta 5 fármacos'],
+          ['Efectos adversos', true, true],
+          ['Contraindicaciones', true, true],
+          ['Favoritos', true, true],
+          ['Historial', true, true],
+          ['Nota clínica', true, true],
+          ['Análisis clínico IA', true, true],
         ].map(([label, free, pro]) => (
           <div key={String(label)} className="grid grid-cols-3 border-b border-slate-100 last:border-0">
             <div className="p-3 text-xs text-slate-600">{label}</div>
             <div className="p-3 text-center flex items-center justify-center">
-              {free === null
-                ? <Minus size={12} className="text-slate-300" />
+              {free === true
+                ? <Check size={13} className="text-blue-600" strokeWidth={2.5} />
                 : <span className="text-xs font-medium text-slate-500">{free}</span>}
             </div>
             <div className="p-3 text-center flex items-center justify-center">

@@ -2,7 +2,7 @@
 import { useState, type FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Pill, Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeOff } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 
 export default function LoginPage() {
@@ -39,12 +39,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-[70vh] flex flex-col items-center justify-center">
       <div className="w-full max-w-sm">
-        {/* Logo */}
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <Pill size={24} className="text-blue-600 sm:size-28" />
-            <span className="whitespace-nowrap text-xl font-bold text-gray-800 sm:text-2xl">Farma<span className="text-blue-600">Chile</span></span>
-          </div>
           <p className="text-gray-500 text-sm">Inicia sesión con tu correo y contraseña</p>
         </div>
 

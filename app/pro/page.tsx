@@ -218,7 +218,7 @@ export default function ProPage() {
                   : 'bg-slate-900 text-white hover:bg-slate-800'
               }`}
             >
-              {loadingPlan === plan.key ? 'Redirigiendo...' : `Comenzar con ${plan.label.toLowerCase()}`}
+              {loadingPlan === plan.key ? 'Redirigiendo...' : 'Prueba gratis 5 días'}
             </button>
             <p className={`mt-3 text-xs text-center ${plan.key === 'annual' ? 'text-slate-400' : 'text-slate-400'}`}>
               {plan.key === 'annual'

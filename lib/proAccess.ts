@@ -21,9 +21,9 @@ export const PRO_PLANS: Record<ProPlanKey, ProPlanConfig> = {
   annual: {
     key: 'annual',
     label: 'Anual',
-    priceClp: 148990,
+    priceClp: 179880,
     durationDays: 365,
-    priceLabel: '$148.990',
+    priceLabel: '$179.880',
     subtitle: 'Acceso completo por 1 año',
   },
 }
@@ -65,7 +65,13 @@ export function resolveProPlanKey(value: unknown): ProPlanKey | null {
   const normalized = String(value ?? '').trim().toLowerCase()
   if (!normalized) return null
 
-  if (normalized.includes('148990') || normalized.includes('annual') || normalized.includes('anual')) {
+  if (
+    normalized.includes('179880') ||
+    normalized.includes('148990') ||
+    normalized.includes('14990') ||
+    normalized.includes('annual') ||
+    normalized.includes('anual')
+  ) {
     return 'annual'
   }
 
@@ -84,6 +90,7 @@ export function getProPlanByAmount(amount: unknown): ProPlanKey | null {
 
   if (!Number.isFinite(numeric)) return null
   if (numeric === PRO_PLANS.monthly.priceClp) return 'monthly'
+  if (numeric === 148990) return 'annual' // compatibilidad con suscripciones legacy
   if (numeric === PRO_PLANS.annual.priceClp) return 'annual'
 
   return null

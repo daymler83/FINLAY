@@ -3,19 +3,12 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
-  CheckCircle, Lock, Zap, AlertTriangle, Ban,
+  CheckCircle, Zap, AlertTriangle, Ban,
   Star, Scale, Clock, Activity, FileText, Brain,
   Check, ArrowRight,
 } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { PRO_PLAN_LIST, type ProPlanKey } from '@/lib/proAccess'
-
-const TRIAL_FEATURES = [
-  'Acceso completo por 5 días para cuentas nuevas',
-  'Requiere registrar tarjeta en Mercado Pago',
-  'Comparador y análisis clínico con IA',
-  'Si no cancelas, se cobra y continúa automáticamente',
-]
 
 const PRO_FEATURES = [
   { icon: Zap,           iconColor: 'text-blue-600',   bg: 'bg-blue-50',   label: '10k+ fármacos' },
@@ -28,6 +21,8 @@ const PRO_FEATURES = [
   { icon: Activity,      iconColor: 'text-teal-600',   bg: 'bg-teal-50',   label: 'Nivel de interacciones' },
   { icon: Brain,         iconColor: 'text-violet-600', bg: 'bg-violet-50', label: 'Análisis clínico con IA' },
 ]
+
+const ANNUAL_MONTHLY_EQUIVALENT_CLP = 14990
 
 function formatCurrency(amount: number) {
   return new Intl.NumberFormat('es-CL', {
@@ -149,9 +144,6 @@ export default function ProPage() {
           <Zap size={11} fill="currentColor" /> FINLAY Pro
         </div>
         <h1 className="text-3xl font-bold text-slate-900 mb-2 tracking-tight">Planes para usar FINLAY</h1>
-        <p className="text-slate-500 text-sm">
-          No hay plan gratuito permanente. La prueba de 5 días requiere tarjeta y luego continúa con cobro automático si no cancelas.
-        </p>
       </div>
 
       {error && (
@@ -160,43 +152,7 @@ export default function ProPage() {
         </p>
       )}
 
-      <div className="grid gap-4 lg:grid-cols-3">
-        <article className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 flex flex-col">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-widest text-slate-400">Prueba</p>
-              <h2 className="mt-1 text-xl font-bold text-slate-900">5 días gratis</h2>
-            </div>
-            <div className="w-11 h-11 rounded-2xl bg-slate-100 flex items-center justify-center">
-              <Lock size={16} className="text-slate-500" />
-            </div>
-          </div>
-
-          <div className="mt-4">
-            <p className="text-4xl font-black tracking-tight text-slate-900">$0</p>
-            <p className="text-sm text-slate-500 mt-1">Solo para usuarios nuevos</p>
-          </div>
-
-          <ul className="mt-5 space-y-2.5">
-            {TRIAL_FEATURES.map(item => (
-              <li key={item} className="flex items-start gap-2 text-sm text-slate-600">
-                <Check size={14} className="text-emerald-500 mt-0.5 shrink-0" />
-                <span>{item}</span>
-              </li>
-            ))}
-          </ul>
-
-          <div className="mt-6">
-            <button
-              onClick={() => handleCheckout('monthly')}
-              disabled={loadingPlan !== null}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white hover:bg-slate-800 transition-colors disabled:opacity-60"
-            >
-              {loadingPlan === 'monthly' ? 'Redirigiendo...' : 'Activar prueba gratis'}
-            </button>
-          </div>
-        </article>
-
+      <div className="grid gap-4 lg:grid-cols-2">
         {PRO_PLAN_LIST.map(plan => (
           <article
             key={plan.key}
@@ -208,7 +164,7 @@ export default function ProPage() {
           >
             {plan.key === 'annual' && (
               <div className="absolute right-5 top-5 rounded-full bg-white/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-white/80">
-                Mejor ahorro
+                25% de ahorro
               </div>
             )}
 
@@ -230,10 +186,12 @@ export default function ProPage() {
 
             <div className="mt-4">
               <p className={`text-4xl font-black tracking-tight ${plan.key === 'annual' ? 'text-white' : 'text-slate-900'}`}>
-                {formatCurrency(plan.priceClp)}
+                {plan.key === 'annual' ? formatCurrency(ANNUAL_MONTHLY_EQUIVALENT_CLP) : formatCurrency(plan.priceClp)}
               </p>
               <p className={`text-sm mt-1 ${plan.key === 'annual' ? 'text-slate-300' : 'text-slate-500'}`}>
-                {plan.subtitle}
+                {plan.key === 'annual'
+                  ? `${formatCurrency(ANNUAL_MONTHLY_EQUIVALENT_CLP)}/mes · ${plan.subtitle}`
+                  : 'Cada mes se cobra el monto y puedes seguir usando el comparador.'}
               </p>
             </div>
 
@@ -260,10 +218,12 @@ export default function ProPage() {
                   : 'bg-slate-900 text-white hover:bg-slate-800'
               }`}
             >
-              {loadingPlan === plan.key ? 'Redirigiendo...' : `Elegir ${plan.label.toLowerCase()}`}
+              {loadingPlan === plan.key ? 'Redirigiendo...' : `Comenzar con ${plan.label.toLowerCase()}`}
             </button>
             <p className={`mt-3 text-xs text-center ${plan.key === 'annual' ? 'text-slate-400' : 'text-slate-400'}`}>
-              Se renueva automáticamente hasta que la canceles.
+              {plan.key === 'annual'
+                ? `Se facturan ${formatCurrency(plan.priceClp)} por año.`
+                : `Se paga ${formatCurrency(plan.priceClp)} por mes.`}
             </p>
           </article>
         ))}
@@ -286,10 +246,11 @@ export default function ProPage() {
       <div className="bg-slate-50 border border-slate-200 rounded-3xl p-5">
         <div className="grid grid-cols-3 border-b border-slate-200">
           <div className="p-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Función</div>
-          <div className="p-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">Prueba 5 días</div>
-          <div className="p-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">Pro</div>
+          <div className="p-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">Plan mensual</div>
+          <div className="p-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">Plan anual</div>
         </div>
         {[
+          ['Prueba gratis', '5 días', '5 días'],
           ['Fármacos', '10k+', '10k+'],
           ['Comparador', 'hasta 5 fármacos', 'hasta 5 fármacos'],
           ['Efectos adversos', true, true],
@@ -317,10 +278,10 @@ export default function ProPage() {
 
       <div className="bg-white rounded-2xl p-5 text-center border border-slate-200 shadow-sm">
         <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center mx-auto mb-3">
-          <Lock size={16} className="text-slate-400" />
+          <Zap size={16} className="text-slate-400" />
         </div>
         <p className="text-sm text-slate-600">
-          Pago seguro con Mercado Pago. La suscripción se renueva automáticamente hasta que la canceles.
+          Pago seguro con Mercado Pago. Si necesitas ayuda para activar, escríbenos al +56962163952.
         </p>
       </div>
     </div>

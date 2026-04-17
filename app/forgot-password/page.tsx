@@ -4,6 +4,8 @@ import { useState, type FormEvent } from 'react'
 import Link from 'next/link'
 import { Pill } from 'lucide-react'
 
+const REQUEST_TIMEOUT_MS = 10000
+
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
@@ -18,22 +20,35 @@ export default function ForgotPasswordPage() {
     setDelivery(null)
     setLoading(true)
 
-    const res = await fetch('/api/auth/password-reset/request', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email }),
-    })
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
 
-    const data = await res.json()
-    setLoading(false)
+    try {
+      const res = await fetch('/api/auth/password-reset/request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+        signal: controller.signal,
+      })
 
-    if (!res.ok) {
-      setError(data.error ?? 'No pudimos procesar la solicitud')
-      return
+      const data = await res.json().catch(() => ({}))
+
+      if (!res.ok) {
+        setError((data as { error?: string }).error ?? 'No pudimos procesar la solicitud')
+        return
+      }
+
+      setMessage((data as { message?: string }).message ?? 'Revisa tu correo para continuar.')
+      setDelivery((data as { delivery?: 'smtp' | 'console' | null }).delivery ?? null)
+    } catch (error) {
+      const message = error instanceof DOMException && error.name === 'AbortError'
+        ? 'La solicitud tardó demasiado. Intenta nuevamente.'
+        : 'No pudimos conectar con el servidor. Intenta nuevamente.'
+      setError(message)
+    } finally {
+      clearTimeout(timeoutId)
+      setLoading(false)
     }
-
-    setMessage(data.message ?? 'Revisa tu correo para continuar.')
-    setDelivery(data.delivery ?? null)
   }
 
   return (

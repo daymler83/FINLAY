@@ -56,18 +56,30 @@ export async function sendPasswordResetEmail({
     host: smtp.host,
     port: smtp.port,
     secure: smtp.port === 465,
+    connectionTimeout: 7000,
+    greetingTimeout: 7000,
+    socketTimeout: 10000,
     auth: {
       user: smtp.user,
       pass: smtp.pass,
     },
   })
+  const timeoutMs = 12000
+  let timeout: NodeJS.Timeout | null = null
 
-  const info = await transporter.sendMail({
-    from: smtp.from,
-    to,
-    subject,
-    text,
-    html,
+  const info = await Promise.race([
+    transporter.sendMail({
+      from: smtp.from,
+      to,
+      subject,
+      text,
+      html,
+    }),
+    new Promise<never>((_, reject) => {
+      timeout = setTimeout(() => reject(new Error('mail_send_timeout')), timeoutMs)
+    }),
+  ]).finally(() => {
+    if (timeout) clearTimeout(timeout)
   })
 
   console.info(

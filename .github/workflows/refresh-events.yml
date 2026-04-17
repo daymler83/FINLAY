@@ -9,8 +9,43 @@ jobs:
   refresh:
     runs-on: ubuntu-latest
     steps:
-      - name: Call refresh endpoint
+      - name: Validate required secrets
+        env:
+          APP_URL: ${{ secrets.APP_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
         run: |
-          curl --fail --show-error --silent \
-            -X POST "${{ secrets.APP_URL }}/api/sidebar/events/refresh" \
-            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"
+          if [ -z "$APP_URL" ]; then
+            echo "Missing required secret: APP_URL"
+            exit 1
+          fi
+          if [ -z "$CRON_SECRET" ]; then
+            echo "Missing required secret: CRON_SECRET"
+            exit 1
+          fi
+
+      - name: Call refresh endpoint
+        env:
+          APP_URL: ${{ secrets.APP_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          RESPONSE=$(curl --silent --show-error \
+            -X POST "${APP_URL}/api/sidebar/events/refresh" \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            -H "Accept: application/json" \
+            -w "\nHTTP_STATUS:%{http_code}")
+
+          HTTP_STATUS=$(echo "$RESPONSE" | sed -n 's/^HTTP_STATUS://p')
+          HTTP_BODY=$(echo "$RESPONSE" | sed '/^HTTP_STATUS:/d')
+
+          echo "Refresh endpoint status: ${HTTP_STATUS}"
+          echo "Refresh endpoint body: ${HTTP_BODY}"
+
+          case "$HTTP_STATUS" in
+            2*)
+              echo "Refresh completed successfully."
+              ;;
+            *)
+              echo "Refresh failed with status ${HTTP_STATUS}."
+              exit 1
+              ;;
+          esac

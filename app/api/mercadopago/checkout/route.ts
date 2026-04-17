@@ -6,6 +6,30 @@ import { prisma } from '@/lib/prisma'
 import { PRO_PLANS, resolveProPlanKey } from '@/lib/proAccess'
 import { storePendingProSubscription } from '@/lib/proSubscription'
 
+const FREE_TRIAL_DISQUALIFYING_STATUSES = new Set([
+  'authorized',
+  'active',
+  'paused',
+  'cancelled',
+  'canceled',
+  'expired',
+  'ended',
+])
+
+function shouldIncludeFreeTrial(user: {
+  proPlan: string | null
+  proSubscriptionStatus: string | null
+  proExpiresAt: Date | null
+} | null) {
+  if (!user) return true
+  if (user.proExpiresAt) return false
+
+  const status = String(user.proSubscriptionStatus ?? '').trim().toLowerCase()
+  if (status && FREE_TRIAL_DISQUALIFYING_STATUSES.has(status)) return false
+
+  return !user.proPlan
+}
+
 export async function POST(request: NextRequest) {
   const session = await getSession()
   if (!session) {
@@ -32,10 +56,7 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    const includeFreeTrial = !currentUser?.proPlan &&
-      !currentUser?.proSubscriptionId &&
-      !currentUser?.proSubscriptionStatus &&
-      !currentUser?.proExpiresAt
+    const includeFreeTrial = shouldIncludeFreeTrial(currentUser)
 
     const subscription = await createMercadoPagoSubscription({
       userId: session.userId,

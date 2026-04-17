@@ -33,7 +33,7 @@ export default function LoginPage() {
     }
 
     await mutate()
-    router.push('/')
+    router.push(data?.user?.isPro ? '/' : '/pro')
   }
 
   return (

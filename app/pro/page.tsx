@@ -1,5 +1,6 @@
 'use client'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
   CheckCircle, Lock, Zap, AlertTriangle, Ban,
@@ -48,11 +49,23 @@ function formatDate(value: string | null) {
 }
 
 export default function ProPage() {
+  const router = useRouter()
   const { user, isLoading } = useAuth()
   const [loadingPlan, setLoadingPlan] = useState<ProPlanKey | null>(null)
   const [error, setError] = useState('')
 
+  useEffect(() => {
+    if (!isLoading && !user) {
+      router.replace('/login')
+    }
+  }, [isLoading, user, router])
+
   const handleCheckout = async (plan: ProPlanKey) => {
+    if (!user) {
+      router.push('/login')
+      return
+    }
+
     setError('')
     setLoadingPlan(plan)
 
@@ -77,7 +90,7 @@ export default function ProPage() {
     }
   }
 
-  if (isLoading) return null
+  if (isLoading || !user) return null
 
   if (user?.isPro) {
     return (
@@ -174,12 +187,13 @@ export default function ProPage() {
           </ul>
 
           <div className="mt-6">
-            <Link
-              href="/register"
-              className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
+            <button
+              onClick={() => handleCheckout('monthly')}
+              disabled={loadingPlan !== null}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white hover:bg-slate-800 transition-colors disabled:opacity-60"
             >
-              Crear cuenta con prueba
-            </Link>
+              {loadingPlan === 'monthly' ? 'Redirigiendo...' : 'Activar prueba gratis'}
+            </button>
           </div>
         </article>
 

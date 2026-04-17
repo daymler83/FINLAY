@@ -33,7 +33,7 @@ export default function RegisterPage() {
     }
 
     await mutate()
-    router.push('/')
+    router.push(data?.user?.isPro ? '/' : '/pro')
   }
 
   return (
@@ -104,7 +104,7 @@ export default function RegisterPage() {
               disabled={loading}
               className="w-full bg-blue-600 text-white font-medium py-3 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
             >
-              {loading ? 'Creando cuenta...' : 'Crear cuenta gratis'}
+              {loading ? 'Creando cuenta...' : 'Crear cuenta'}
             </button>
           </form>
         </div>

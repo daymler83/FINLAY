@@ -75,7 +75,9 @@ export async function createMercadoPagoSubscription(params: {
     : undefined
 
   const body = {
-    reason: `FINLAY Pro ${plan.label}`,
+    reason: freeTrial
+      ? `Plan de 5 días gratuitos · FINLAY Pro ${plan.label}`
+      : `FINLAY Pro ${plan.label}`,
     back_url: `${urls.success}&plan=${plan.key}`,
     notification_url: webhookUrl,
     external_reference: params.userId,

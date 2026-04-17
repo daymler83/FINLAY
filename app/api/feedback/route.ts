@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSession } from '@/lib/auth'
+import { sendFeedbackNotification } from '@/lib/email'
 
 export const dynamic = 'force-dynamic'
 
@@ -27,10 +28,11 @@ export async function POST(request: NextRequest) {
     ? type as FeedbackType
     : 'general'
 
+  const userEmail = session?.email ?? (typeof body?.email === 'string' ? body.email.trim() : null)
   await prisma.feedback.create({
     data: {
       userId: session?.userId ?? null,
-      email: session?.email ?? (typeof body?.email === 'string' ? body.email.trim() : null),
+      email: userEmail,
       type: feedbackType,
       rating,
       title: title || null,
@@ -38,6 +40,20 @@ export async function POST(request: NextRequest) {
       source: 'web',
     },
   })
+
+  try {
+    await sendFeedbackNotification({
+      to: 'finlay.dorexa@gmail.com',
+      type: feedbackType,
+      rating,
+      title: title || null,
+      message,
+      userEmail,
+      userId: session?.userId ?? null,
+    })
+  } catch (error) {
+    console.error('Feedback notification email error:', error)
+  }
 
   return NextResponse.json({ ok: true })
 }

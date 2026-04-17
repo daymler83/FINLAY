@@ -6,6 +6,15 @@ type PasswordResetEmailInput = {
 }
 
 export type PasswordResetDelivery = 'smtp' | 'console'
+type FeedbackNotificationInput = {
+  to: string
+  type: string
+  rating: number
+  title?: string | null
+  message: string
+  userEmail?: string | null
+  userId?: string | null
+}
 
 function getSmtpConfig() {
   const host = process.env.SMTP_HOST
@@ -84,6 +93,81 @@ export async function sendPasswordResetEmail({
 
   console.info(
     `[mail:smtp] accepted=${JSON.stringify(info.accepted)} rejected=${JSON.stringify(info.rejected)} response=${info.response}`,
+  )
+
+  return 'smtp'
+}
+
+export async function sendFeedbackNotification({
+  to,
+  type,
+  rating,
+  title,
+  message,
+  userEmail,
+  userId,
+}: FeedbackNotificationInput): Promise<PasswordResetDelivery> {
+  const smtp = getSmtpConfig()
+  const subject = `Nuevo feedback FINLAY (${type})`
+  const safeTitle = title?.trim() ? title.trim() : '(sin título)'
+  const safeEmail = userEmail?.trim() ? userEmail.trim() : '(sin email)'
+  const safeUserId = userId?.trim() ? userId.trim() : '(anónimo)'
+  const now = new Date().toISOString()
+
+  const text = [
+    'Nuevo feedback recibido en FINLAY',
+    '',
+    `Fecha: ${now}`,
+    `Tipo: ${type}`,
+    `Rating: ${rating}/5`,
+    `Título: ${safeTitle}`,
+    `Email usuario: ${safeEmail}`,
+    `User ID: ${safeUserId}`,
+    '',
+    'Mensaje:',
+    message,
+  ].join('\n')
+
+  const html = `
+    <p><strong>Nuevo feedback recibido en FINLAY</strong></p>
+    <p><strong>Fecha:</strong> ${now}</p>
+    <p><strong>Tipo:</strong> ${type}</p>
+    <p><strong>Rating:</strong> ${rating}/5</p>
+    <p><strong>Título:</strong> ${safeTitle}</p>
+    <p><strong>Email usuario:</strong> ${safeEmail}</p>
+    <p><strong>User ID:</strong> ${safeUserId}</p>
+    <p><strong>Mensaje:</strong></p>
+    <pre style="white-space: pre-wrap; font-family: inherit;">${message}</pre>
+  `
+
+  if (!smtp) {
+    console.info(`[mail:dev] Feedback notification for ${to}\n${text}`)
+    return 'console'
+  }
+
+  const transporter = nodemailer.createTransport({
+    host: smtp.host,
+    port: smtp.port,
+    secure: smtp.port === 465,
+    connectionTimeout: 7000,
+    greetingTimeout: 7000,
+    socketTimeout: 10000,
+    auth: {
+      user: smtp.user,
+      pass: smtp.pass,
+    },
+  })
+
+  const info = await transporter.sendMail({
+    from: smtp.from,
+    to,
+    subject,
+    text,
+    html,
+  })
+
+  console.info(
+    `[mail:smtp] feedback accepted=${JSON.stringify(info.accepted)} rejected=${JSON.stringify(info.rejected)} response=${info.response}`,
   )
 
   return 'smtp'

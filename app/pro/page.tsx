@@ -281,7 +281,7 @@ export default function ProPage() {
           <Zap size={16} className="text-slate-400" />
         </div>
         <p className="text-sm text-slate-600">
-          Pago seguro con Mercado Pago. Si necesitas ayuda para activar, escríbenos al +56962163952.
+          Pago seguro con Mercado Pago. Si algo falla en la app, usa el botón de Feedback o escríbenos a finlay.dorexa@gmail.com.
         </p>
       </div>
     </div>

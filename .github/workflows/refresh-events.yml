@@ -1,0 +1,16 @@
+name: Refresh Sidebar Events
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"
+  workflow_dispatch:
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call refresh endpoint
+        run: |
+          curl --fail --show-error --silent \
+            -X POST "${{ secrets.APP_URL }}/api/sidebar/events/refresh" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"

@@ -2,7 +2,7 @@
 import { useState, type FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Pill, Eye, EyeOff } from 'lucide-react'
+import { Cross, Eye, EyeOff } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 
 export default function RegisterPage() {
@@ -42,8 +42,10 @@ export default function RegisterPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-2">
-            <Pill size={24} className="text-blue-600 sm:size-28" />
-            <span className="whitespace-nowrap text-xl font-bold text-gray-800 sm:text-2xl">Farma<span className="text-blue-600">Chile</span></span>
+            <div className="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center">
+              <Cross size={14} className="text-white" fill="white" />
+            </div>
+            <span className="text-xl font-bold text-slate-900 tracking-tight">FINLAY</span>
           </div>
           <p className="text-gray-500 text-sm">Crea tu cuenta con correo y contraseña</p>
         </div>

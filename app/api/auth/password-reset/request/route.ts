@@ -39,6 +39,19 @@ export async function POST(request: NextRequest) {
       delivery,
     })
   } catch (error) {
+    const msg = error instanceof Error ? error.message : ''
+    if (msg === 'mail_not_configured') {
+      return NextResponse.json(
+        { error: 'El envío de emails no está configurado. Contacta al soporte en soporte@finlay.cl' },
+        { status: 503 }
+      )
+    }
+    if (msg === 'mail_send_timeout') {
+      return NextResponse.json(
+        { error: 'No se pudo enviar el email (timeout). Intenta nuevamente en unos minutos.' },
+        { status: 503 }
+      )
+    }
     console.error('Password reset request error:', error)
     return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 })
   }

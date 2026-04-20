@@ -49,7 +49,7 @@ export default function ProSuccessPage() {
 
       <div>
         <div className="inline-flex items-center gap-1 bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm font-medium mb-3">
-          <Zap size={14} /> {user?.isPro ? 'FarmaChile Pro activo' : 'Verificando activación...'}
+          <Zap size={14} /> {user?.isPro ? 'FINLAY Pro activo' : 'Verificando activación...'}
         </div>
         <h1 className="text-2xl font-bold text-gray-900">
           {user?.isPro ? `¡Suscripción ${plan === 'annual' ? 'anual' : 'mensual'} activada!` : 'Procesando tu activación'}
@@ -67,7 +67,7 @@ export default function ProSuccessPage() {
         href="/"
         className="inline-block bg-blue-600 text-white font-medium px-8 py-3 rounded-xl hover:bg-blue-700 transition-colors"
       >
-        {user?.isPro ? 'Empezar a usar FarmaChile Pro' : 'Volver al inicio'}
+        {user?.isPro ? 'Empezar a usar FINLAY Pro' : 'Volver al inicio'}
       </Link>
     </div>
   )

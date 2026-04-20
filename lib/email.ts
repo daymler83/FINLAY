@@ -35,11 +35,11 @@ export async function sendPasswordResetEmail({
   code,
 }: PasswordResetEmailInput): Promise<PasswordResetDelivery> {
   const smtp = getSmtpConfig()
-  const subject = 'Restablece tu contraseña de FarmaChile'
+  const subject = 'Restablece tu contraseña de FINLAY'
   const text = [
     'Hola,',
     '',
-    'Recibimos una solicitud para restablecer tu contraseña en FarmaChile.',
+    'Recibimos una solicitud para restablecer tu contraseña en FINLAY.',
     `Tu código de recuperación es: ${code}`,
     '',
     'Si no solicitaste este cambio, puedes ignorar este mensaje.',
@@ -47,7 +47,7 @@ export async function sendPasswordResetEmail({
 
   const html = `
     <p>Hola,</p>
-    <p>Recibimos una solicitud para restablecer tu contraseña en FarmaChile.</p>
+    <p>Recibimos una solicitud para restablecer tu contraseña en FINLAY.</p>
     <p>Tu código de recuperación es: <strong>${code}</strong></p>
     <p>Si no solicitaste este cambio, puedes ignorar este mensaje.</p>
   `

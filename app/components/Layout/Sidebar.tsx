@@ -107,7 +107,11 @@ export default function Sidebar({ isPro }: SidebarProps) {
         body: JSON.stringify({ message: msg, history: messages }),
       })
       const data = await res.json()
-      setMessages([...newMessages, { role: 'assistant', content: data.reply ?? 'Sin respuesta.' }])
+      if (res.status === 429 && data.error === 'limit_reached') {
+        setMessages([...newMessages, { role: 'assistant', content: `⚠️ ${data.message}` }])
+      } else {
+        setMessages([...newMessages, { role: 'assistant', content: data.reply ?? 'Sin respuesta.' }])
+      }
     } catch {
       setMessages([...newMessages, { role: 'assistant', content: 'Error al conectar. Intenta nuevamente.' }])
     } finally {

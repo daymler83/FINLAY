@@ -5,6 +5,7 @@ import { getSession } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { loadSyncedProUser } from '@/lib/proSubscription'
 import { formatMedicationDisplayName } from '@/lib/medicationDisplay'
+import { AI_FREE_LIMIT } from '@/lib/freePeriod'
 
 function getOpenAIClient() {
   const apiKey = process.env.OPENAI_API_KEY
@@ -74,6 +75,17 @@ export async function POST(req: NextRequest) {
     const { message, history = [] } = await req.json()
     if (!message?.trim()) {
       return NextResponse.json({ error: 'Mensaje requerido' }, { status: 400 })
+    }
+
+    // Enforce AI consultation limit for non-Pro users
+    if (!isPro && usuario) {
+      const consultas = usuario.aiConsultas ?? 0
+      if (consultas >= AI_FREE_LIMIT) {
+        return NextResponse.json({
+          error: 'limit_reached',
+          message: `Alcanzaste el límite de ${AI_FREE_LIMIT} consultas gratuitas. Activa el plan Pro para consultas ilimitadas.`,
+        }, { status: 429 })
+      }
     }
 
     const select = {
@@ -236,6 +248,14 @@ export async function POST(req: NextRequest) {
         "sourceModel" = EXCLUDED."sourceModel",
         "createdByUserId" = EXCLUDED."createdByUserId"
     `
+
+    // Increment counter for non-Pro users
+    if (!isPro && session?.userId) {
+      await prisma.usuario.update({
+        where: { id: session.userId },
+        data: { aiConsultas: { increment: 1 } },
+      })
+    }
 
     return NextResponse.json({ reply, cached: false })
   } catch (err) {

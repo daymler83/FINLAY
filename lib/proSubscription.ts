@@ -25,6 +25,7 @@ type MercadoPagoSubscriptionSnapshot = {
 export type SyncedProUser = Omit<UserWithSubscription, 'proSubscriptionId'> & {
   isPro: boolean
   proSubscriptionId: string | null
+  aiConsultas: number
 }
 
 function parseMercadoPagoDate(value: unknown) {
@@ -92,6 +93,7 @@ export async function loadSyncedProUser(userId: string): Promise<SyncedProUser |
       proSubscriptionId: true,
       proSubscriptionStatus: true,
       proExpiresAt: true,
+      aiConsultas: true,
     },
   })
 
@@ -107,7 +109,7 @@ export async function loadSyncedProUser(userId: string): Promise<SyncedProUser |
   try {
     const subscription = await fetchMercadoPagoSubscription(user.proSubscriptionId)
     const updated = await applyMercadoPagoSubscriptionSnapshot(user, subscription)
-    return { ...updated, isPro: hasActiveProAccess(updated) }
+    return { ...updated, aiConsultas: user.aiConsultas, isPro: hasActiveProAccess(updated) }
   } catch (error) {
     console.warn('No se pudo sincronizar la suscripción Pro:', error instanceof Error ? error.message : error)
     return {

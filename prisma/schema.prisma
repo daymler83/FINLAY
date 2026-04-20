@@ -41,6 +41,7 @@ model Usuario {
   stripeId                 String?
   passwordResetTokenHash   String?
   passwordResetExpiresAt   DateTime?
+  aiConsultas              Int                 @default(0)
   createdAt                DateTime            @default(now())
   favoritos                Favorito[]
   historial                HistorialBusqueda[]

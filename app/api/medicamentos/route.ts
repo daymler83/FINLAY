@@ -5,6 +5,7 @@ import { getSession } from '@/lib/auth'
 import { ClinicalCategory, getAllClinicalCategoryMatchers, getClinicalCategoryMatchers, isClinicalCategory, resolveClinicalCategory } from '@/lib/clinicalCategory'
 import { loadSyncedProUser } from '@/lib/proSubscription'
 import { formatMedicationDisplayName } from '@/lib/medicationDisplay'
+import { isFreePeriodActive } from '@/lib/freePeriod'
 
 const PRO_LIMIT  = 500
 export const dynamic = 'force-dynamic'
@@ -44,7 +45,7 @@ export async function GET(request: NextRequest) {
   }
 
   const usuario = await loadSyncedProUser(session.userId)
-  const isPro = Boolean(usuario?.isPro)
+  const isPro = Boolean(usuario?.isPro) || isFreePeriodActive()
   if (!isPro) {
     return NextResponse.json({ error: 'Se requiere plan Pro activo. Los nuevos usuarios tienen 5 días gratis.' }, { status: 403 })
   }

@@ -96,7 +96,7 @@ function LandingPage() {
           </p>
 
           <p className="mt-6 text-[11px] text-slate-400">
-            Prueba de 5 días incluida · Sin compromiso · Cancela cuando quieras
+            Acceso gratuito hasta el 5 de mayo · Sin tarjeta requerida
           </p>
         </div>
       </section>
@@ -125,7 +125,7 @@ function LandingPage() {
       {/* ── CTA banner ── */}
       <section className="rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-50 to-indigo-50 p-6 text-center">
         <p className="font-bold text-slate-900">¿Eres profesional de salud?</p>
-        <p className="text-sm text-slate-500 mt-1">Regístrate arriba y empieza con 5 días de prueba gratuita.</p>
+        <p className="text-sm text-slate-500 mt-1">Regístrate arriba y accede gratis hasta el 5 de mayo.</p>
       </section>
 
     </div>

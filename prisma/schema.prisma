@@ -14,6 +14,9 @@ model Medicamento {
   familia            String
   presentacion       String
   laboratorio        String
+  registroIsp        String?
+  estadoRegistroIsp  String?
+  titularRegistroIsp String?
   precioReferencia   Float?
   vidaMedia          String?
   nivelInteracciones String?

@@ -321,6 +321,9 @@ export default function Sidebar({ isPro }: SidebarProps) {
                     <Send size={14} />
                   </button>
                 </div>
+                <p className="mt-2 text-[10px] leading-4 text-slate-400">
+                  Apoyo informativo para profesionales de salud. No reemplaza juicio clínico ni indicación médica.
+                </p>
               </div>
             </>
           )}

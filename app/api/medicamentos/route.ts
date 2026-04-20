@@ -16,6 +16,9 @@ type MedicamentoBase = {
   presentacion: string
   familia: string
   laboratorio: string
+  registroIsp: string | null
+  estadoRegistroIsp: string | null
+  titularRegistroIsp: string | null
   precioReferencia: number | null
   vidaMedia: string | null
   nivelInteracciones: string | null
@@ -27,7 +30,7 @@ type MedicamentoConCategoria = MedicamentoBase & {
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
-  const q = searchParams.get('q')
+  const q = searchParams.get('q')?.trim() ?? ''
   const categoriaRaw = searchParams.get('categoria')
   const categoria = categoriaRaw && isClinicalCategory(categoriaRaw) ? categoriaRaw : null
 
@@ -51,16 +54,28 @@ export async function GET(request: NextRequest) {
   const where: Prisma.MedicamentoWhereInput = {
     precioReferencia: { gt: 0 },
   }
-  if (q) {
-    where.OR = [
-      { nombre:          { contains: q, mode: 'insensitive' } },
-      { principioActivo: { contains: q, mode: 'insensitive' } },
-      { laboratorio:     { contains: q, mode: 'insensitive' } },
-      { familia:         { contains: q, mode: 'insensitive' } },
-    ]
-  }
 
   const andFilters: Prisma.MedicamentoWhereInput[] = []
+
+  if (q) {
+    const terms = q
+      .split(/[\s,;/]+/)
+      .map(term => term.trim())
+      .filter(Boolean)
+      .slice(0, 6)
+
+    for (const term of terms) {
+      andFilters.push({
+        OR: [
+          { nombre:          { contains: term, mode: Prisma.QueryMode.insensitive } },
+          { principioActivo: { contains: term, mode: Prisma.QueryMode.insensitive } },
+          { laboratorio:     { contains: term, mode: Prisma.QueryMode.insensitive } },
+          { familia:         { contains: term, mode: Prisma.QueryMode.insensitive } },
+          { presentacion:    { contains: term, mode: Prisma.QueryMode.insensitive } },
+        ],
+      })
+    }
+  }
 
   if (categoria) {
     const termToFilters = (terms: string[]): Prisma.MedicamentoWhereInput[] => terms.flatMap(term => ([
@@ -95,6 +110,7 @@ export async function GET(request: NextRequest) {
         select: {
           id: true, nombre: true, principioActivo: true,
           presentacion: true, familia: true, laboratorio: true,
+          registroIsp: true, estadoRegistroIsp: true, titularRegistroIsp: true,
           precioReferencia: true, vidaMedia: true, nivelInteracciones: true,
         },
         take: limit,

@@ -20,6 +20,9 @@ interface MedicamentoDetalleResponse {
   presentacion: string
   familia: string
   laboratorio: string
+  registroIsp: string | null
+  estadoRegistroIsp: string | null
+  titularRegistroIsp: string | null
   precioReferencia: number | null
   vidaMedia: string | null
   nivelInteracciones: string | null
@@ -98,6 +101,8 @@ export default function MedicamentoDetalle() {
       `Principio activo: ${med.principioActivo}`,
       `Familia: ${med.familia}`,
       `Laboratorio: ${med.laboratorio}`,
+      med.registroIsp ? `Registro ISP: ${med.registroIsp}` : '',
+      med.estadoRegistroIsp ? `Estado ISP: ${med.estadoRegistroIsp}` : '',
       `Presentación: ${med.presentacion}`,
       med.vidaMedia ? `Vida media: ${med.vidaMedia}` : '',
       med.nivelInteracciones ? `Nivel de interacciones: ${med.nivelInteracciones}` : '',
@@ -210,6 +215,21 @@ export default function MedicamentoDetalle() {
                 <p className="text-[10px] text-gray-400 uppercase font-medium tracking-wide mb-1">Vida media</p>
                 <p className="text-sm font-semibold text-gray-800">{med.vidaMedia}</p>
               </div>
+            </div>
+          )}
+          {med.registroIsp && (
+            <div className="bg-gray-50 rounded-xl p-3">
+              <p className="text-[10px] text-gray-400 uppercase font-medium tracking-wide mb-1">Registro ISP</p>
+              <p className="text-sm font-semibold text-gray-800">{med.registroIsp}</p>
+              {med.estadoRegistroIsp && (
+                <p className="text-[11px] text-gray-500 mt-0.5">{med.estadoRegistroIsp}</p>
+              )}
+            </div>
+          )}
+          {med.titularRegistroIsp && (
+            <div className="bg-gray-50 rounded-xl p-3">
+              <p className="text-[10px] text-gray-400 uppercase font-medium tracking-wide mb-1">Titular ISP</p>
+              <p className="text-sm font-semibold text-gray-800">{med.titularRegistroIsp}</p>
             </div>
           )}
           {med.nivelInteracciones && (

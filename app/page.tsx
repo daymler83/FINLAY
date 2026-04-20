@@ -25,6 +25,9 @@ interface Medicamento {
   presentacion: string
   familia: string
   laboratorio: string
+  registroIsp: string | null
+  estadoRegistroIsp: string | null
+  titularRegistroIsp: string | null
   precioReferencia: number | null
   vidaMedia: string | null
   nivelInteracciones: string | null

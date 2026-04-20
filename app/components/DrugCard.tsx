@@ -11,6 +11,8 @@ interface DrugCardProps {
   presentacion: string
   familia: string
   laboratorio: string
+  registroIsp?: string | null
+  estadoRegistroIsp?: string | null
   categoriaClinica?: ClinicalCategory
   precioReferencia?: number | null
   vidaMedia?: string | null
@@ -33,7 +35,7 @@ const interaccionesColor: Record<string, string> = {
 
 export default function DrugCard({
   id, nombre, principioActivo, presentacion, familia, laboratorio, categoriaClinica,
-  precioReferencia, vidaMedia, nivelInteracciones,
+  registroIsp, estadoRegistroIsp, precioReferencia, vidaMedia, nivelInteracciones,
   selected = false, expanded = false, onToggle, onExpand,
 }: DrugCardProps) {
   const isGenerico = detectGenerico(nombre, principioActivo)
@@ -151,6 +153,18 @@ export default function DrugCard({
               <dt className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Interacciones</dt>
               <dd className={`text-sm font-bold mt-0.5 ${interaccionesColor[nivelInteracciones ?? ''] ?? 'text-slate-300'}`}>
                 {nivelInteracciones ?? '—'}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Registro ISP</dt>
+              <dd className="text-sm font-medium text-slate-800 mt-0.5">
+                {registroIsp ?? <span className="text-slate-300">—</span>}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Estado ISP</dt>
+              <dd className="text-sm font-medium text-slate-800 mt-0.5">
+                {estadoRegistroIsp ?? <span className="text-slate-300">—</span>}
               </dd>
             </div>
           </dl>

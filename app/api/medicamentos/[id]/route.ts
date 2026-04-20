@@ -27,7 +27,24 @@ export async function GET(
   
   try {
     const medicamento = await prisma.medicamento.findUnique({
-      where: { id }
+      where: { id },
+      select: {
+        id: true,
+        nombre: true,
+        principioActivo: true,
+        presentacion: true,
+        familia: true,
+        laboratorio: true,
+        registroIsp: true,
+        estadoRegistroIsp: true,
+        titularRegistroIsp: true,
+        precioReferencia: true,
+        vidaMedia: true,
+        nivelInteracciones: true,
+        efectosAdversos: true,
+        contraindicaciones: true,
+        indicaciones: true,
+      },
     })
     
     if (!medicamento) {

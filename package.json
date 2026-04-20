@@ -14,6 +14,10 @@
     "reclassify:vademecum:chile": "node pipeline/reclassify_vademecum_chile.js",
     "reclassify:vademecum:chile:ai": "node pipeline/reclassify_vademecum_chile_ai.js",
     "download:vademecum:chile": "node pipeline/export_vademecum_chile.js",
+    "import:isp:registro": "node scripts/import-isp-registry.js",
+    "scrape:isp:registro": "node scripts/scrape-isp-registry.js",
+    "qa:pro:user": "node scripts/create-local-pro-user.js",
+    "qa:pro:disable": "node scripts/disable-local-pro-user.js",
     "start": "next start --hostname 0.0.0.0 -p ${PORT:-3000}",
     "lint": "eslint"
   },

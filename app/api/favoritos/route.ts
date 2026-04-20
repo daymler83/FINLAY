@@ -16,6 +16,7 @@ export async function GET() {
         select: {
           id: true, nombre: true, principioActivo: true,
           presentacion: true, familia: true, laboratorio: true,
+          registroIsp: true, estadoRegistroIsp: true, titularRegistroIsp: true,
           precioReferencia: true, vidaMedia: true, nivelInteracciones: true,
         },
       },

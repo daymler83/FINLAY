@@ -126,3 +126,24 @@ Checklist de migración Heroku -> Railway:
 7. Cambiar DNS del dominio final a Railway.
 8. Confirmar tráfico y webhooks en Railway.
 9. Desactivar app en Heroku una vez estable.
+
+## QA local sin afectar producción
+
+Para revisar pantallas Pro y probar cambios en local sin tocar cobros ni producción:
+
+1. Usa una base local/staging en tu `.env.local` (no la `DATABASE_URL` de producción).
+2. Crea un usuario QA Pro local:
+   - `npm run qa:pro:user`
+3. Inicia la app:
+   - `npm run dev`
+4. Ingresa con el usuario generado (por defecto):
+   - Email: `qa.pro.local@finlay.local`
+   - Clave: `FinlayQA!2026#Pro`
+
+Puedes personalizar credenciales al ejecutar:
+
+- `QA_EMAIL=tu_email QA_PASSWORD=tu_clave npm run qa:pro:user`
+
+Para quitarle acceso Pro al usuario QA:
+
+- `npm run qa:pro:disable`

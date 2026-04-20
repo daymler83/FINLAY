@@ -1,6 +1,8 @@
 import { prisma } from '@/lib/prisma'
 import { fetchMercadoPagoSubscription } from '@/lib/mercadoPago'
 import { getProPlanByAmount, hasActiveProAccess, resolveProPlanKey, type ProPlanKey } from '@/lib/proAccess'
+import { getCachedUser, setCachedUser } from '@/lib/userCache'
+import { isFreePeriodActive } from '@/lib/freePeriod'
 
 type UserWithSubscription = {
   id: string
@@ -82,6 +84,9 @@ async function applyMercadoPagoSubscriptionSnapshot(user: UserWithSubscription, 
 }
 
 export async function loadSyncedProUser(userId: string): Promise<SyncedProUser | null> {
+  const cached = getCachedUser(userId)
+  if (cached) return cached
+
   const user = await prisma.usuario.findUnique({
     where: { id: userId },
     select: {
@@ -99,23 +104,24 @@ export async function loadSyncedProUser(userId: string): Promise<SyncedProUser |
 
   if (!user) return null
 
-  if (!user.proSubscriptionId) {
-    return {
-      ...user,
-      isPro: hasActiveProAccess(user),
-    }
+  // During free period skip MercadoPago sync — everyone gets catalog access anyway
+  if (!user.proSubscriptionId || isFreePeriodActive()) {
+    const result = { ...user, isPro: hasActiveProAccess(user) }
+    setCachedUser(userId, result)
+    return result
   }
 
   try {
     const subscription = await fetchMercadoPagoSubscription(user.proSubscriptionId)
     const updated = await applyMercadoPagoSubscriptionSnapshot(user, subscription)
-    return { ...updated, aiConsultas: user.aiConsultas, isPro: hasActiveProAccess(updated) }
+    const result = { ...updated, aiConsultas: user.aiConsultas, isPro: hasActiveProAccess(updated) }
+    setCachedUser(userId, result)
+    return result
   } catch (error) {
     console.warn('No se pudo sincronizar la suscripción Pro:', error instanceof Error ? error.message : error)
-    return {
-      ...user,
-      isPro: hasActiveProAccess(user),
-    }
+    const result = { ...user, isPro: hasActiveProAccess(user) }
+    setCachedUser(userId, result)
+    return result
   }
 }
 
@@ -157,6 +163,9 @@ export async function syncUserFromMercadoPagoSubscription(params: {
   if (!user) return null
 
   const updated = await applyMercadoPagoSubscriptionSnapshot(user, params.subscription)
+  // Invalidate cache so next request gets fresh Pro status
+  const { invalidateCachedUser } = await import('@/lib/userCache')
+  invalidateCachedUser(params.userId)
   return {
     ...updated,
     isPro: hasActiveProAccess(updated),
